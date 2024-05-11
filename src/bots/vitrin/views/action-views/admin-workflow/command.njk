@@ -1,0 +1,7 @@
+{% if scenario == 'error' %}
+عملیات ناموفق بود.
+{% elif scenario == 'done' %}
+انجام شد.
+{% elif scenario == 'plain' %}
+{{ message }}
+{% endif %}

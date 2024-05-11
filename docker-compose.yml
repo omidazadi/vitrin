@@ -1,0 +1,19 @@
+version: '2.4'
+services:
+    vitrin-postgres:
+        container_name: vitrin-postgres
+        image: postgres:15.6-alpine3.19
+        restart: always
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: 123456
+            POSTGRES_DB: vitrin
+            PGDATA: /var/lib/postgresql/data/pgdata
+        ports:
+            - 31502:5432
+        volumes:
+            - vitrin-postgres-volume:/var/lib/postgresql/data
+        mem_limit: 256m
+volumes:
+    vitrin-postgres-volume:
+        name: vitrin-postgres-volume
