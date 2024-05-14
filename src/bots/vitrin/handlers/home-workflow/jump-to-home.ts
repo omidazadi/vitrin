@@ -7,6 +7,7 @@ import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend
 import { VisitorRepository } from 'src/database/repositories/visitor-repository';
 import { VitrinConfig } from '../../configs/vitrin-config';
 import { allowedMedia } from 'src/infrastructures/allowed-media';
+import { TcommandParser } from 'src/infrastructures/tcommand-parser';
 
 @Injectable()
 export class VitrinHomeWorkflowJumpToHomeHandler {
@@ -33,6 +34,7 @@ export class VitrinHomeWorkflowJumpToHomeHandler {
     })
     public async handle(
         requestContext: RequestContext<Visitor>,
+        tcommandArgs: TcommandParser.TcommandArgs,
     ): Promise<void> {
         const ownerUsername = (
             (await this.grammyBot.api.getChat(

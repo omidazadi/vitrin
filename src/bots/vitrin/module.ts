@@ -1,3 +1,4 @@
+import { readFile } from 'fs/promises';
 import { Module } from '@nestjs/common';
 import { Bot as GrammyBot } from 'grammy';
 import { VitrinUserBuilder } from './user-builder';
@@ -22,6 +23,8 @@ import { VitrinCommandRouter } from './routers/command-router';
 import { VitrinInternalErrorHandler } from './handlers/common/internal-error';
 import { VitrinUnknownErrorHandler } from './handlers/common/unknown-error';
 import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupported-media-error';
+import { TcommandParser } from 'src/infrastructures/tcommand-parser';
+import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflow/command-executers/shop';
 
 @Module({
     imports: [DatabaseModule],
@@ -29,6 +32,21 @@ import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupporte
         {
             provide: 'UI_PATH',
             useValue: 'src/bots/vitrin/views',
+        },
+        {
+            provide: 'BUTTON_TEXTS',
+            useFactory: async function (uiPath: string) {
+                return JSON.parse(
+                    (
+                        await readFile(`${uiPath}/button-texts.json`, 'utf8')
+                    ).toString(),
+                );
+            },
+            inject: ['UI_PATH'],
+        },
+        {
+            provide: 'RUNNING_SHOPS',
+            useValue: {},
         },
         {
             provide: VitrinConfig,
@@ -94,50 +112,11 @@ import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupporte
             useClass: VitrinGateway,
         },
         BotRunner,
+        TcommandParser,
 
         VitrinRootRouter,
-        {
-            provide: VitrinAdminWorkflowRouter,
-            useFactory: async function (
-                uiPath: string,
-                commandHandler: VitrinAdminWorkflowCommandHandler,
-                navigateOutHandler: VitrinAdminWorkflowNavigateOutHandler,
-            ) {
-                const vitrinAdminWorkflowRouter = new VitrinAdminWorkflowRouter(
-                    uiPath,
-                    commandHandler,
-                    navigateOutHandler,
-                );
-                await vitrinAdminWorkflowRouter.configure();
-                return vitrinAdminWorkflowRouter;
-            },
-            inject: [
-                'UI_PATH',
-                VitrinAdminWorkflowCommandHandler,
-                VitrinAdminWorkflowNavigateOutHandler,
-            ],
-        },
-        {
-            provide: VitrinCommandRouter,
-            useFactory: async function (
-                uiPath: string,
-                homeWorkflowjumpToHomeHandler: VitrinHomeWorkflowJumpToHomeHandler,
-                adminWorkflowNavigateInHandler: VitrinAdminWorkflowNavigateInHandler,
-            ) {
-                const vitrinHomeWorkflowHandler = new VitrinCommandRouter(
-                    uiPath,
-                    homeWorkflowjumpToHomeHandler,
-                    adminWorkflowNavigateInHandler,
-                );
-                await vitrinHomeWorkflowHandler.configure();
-                return vitrinHomeWorkflowHandler;
-            },
-            inject: [
-                'UI_PATH',
-                VitrinHomeWorkflowJumpToHomeHandler,
-                VitrinAdminWorkflowNavigateInHandler,
-            ],
-        },
+        VitrinAdminWorkflowRouter,
+        VitrinCommandRouter,
         VitrinAdminWorkflowCommandHandler,
         VitrinAdminWorkflowNavigateInHandler,
         VitrinAdminWorkflowNavigateOutHandler,
@@ -145,6 +124,7 @@ import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupporte
         VitrinInternalErrorHandler,
         VitrinUnknownErrorHandler,
         VitrinUnsupportedMediaErrorHandler,
+        VitrinAdminWorkflowShopCommandExecuter,
     ],
 })
 export class VitrinModule {}

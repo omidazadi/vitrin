@@ -30,7 +30,7 @@ DO $$
             CREATE TABLE IF NOT EXISTS shop (
                 name VARCHAR(64) PRIMARY KEY,
                 full_name VARCHAR(256) NOT NULL,
-                bot_username VARCHAR(256) UNIQUE NOT NULL,
+                tid VARCHAR(256),
                 bot_token VARCHAR(256) UNIQUE NOT NULL,
                 on_maintenance BOOLEAN NOT NULL,
                 maintenance_version INTEGER NOT NULL,

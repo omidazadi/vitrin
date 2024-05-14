@@ -2,19 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { Visitor } from 'src/database/models/visitor';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
-import { VitrinAdminWorkflowShopSubcommandExecuter } from './subcommand-executers/shop';
+import { VitrinAdminWorkflowShopCommandExecuter } from './command-executers/shop';
 
 @Injectable()
 export class VitrinAdminWorkflowCommandHandler {
     private frontend: HydratedFrontend;
-    private shopSubcommandExecuter: VitrinAdminWorkflowShopSubcommandExecuter;
+    private shopCommandExecuter: VitrinAdminWorkflowShopCommandExecuter;
 
     public constructor(
         frontend: HydratedFrontend,
-        shopSubcommandExecuter: VitrinAdminWorkflowShopSubcommandExecuter,
+        shopCommandExecuter: VitrinAdminWorkflowShopCommandExecuter,
     ) {
         this.frontend = frontend;
-        this.shopSubcommandExecuter = shopSubcommandExecuter;
+        this.shopCommandExecuter = shopCommandExecuter;
     }
 
     public async handle(
@@ -24,22 +24,19 @@ export class VitrinAdminWorkflowCommandHandler {
         if (tokens.length === 0) {
             await this.error(requestContext);
         } else if (tokens[0] === 'shop') {
-            await this.shopSubcommandExecuter.createShop(
+            await this.shopCommandExecuter.handle(
                 requestContext,
                 tokens.slice(1, tokens.length),
             );
         } else {
-            await this.frontend.sendActionMessage(
-                requestContext.user.tid,
-                'common/unknown-error',
-            );
+            await this.error(requestContext);
         }
     }
 
     private async error(requestContext: RequestContext<Visitor>) {
         await this.frontend.sendActionMessage(
             requestContext.user.tid,
-            'admin/command',
+            'admin-workflow/command',
             { context: { scenario: 'error' } },
         );
     }

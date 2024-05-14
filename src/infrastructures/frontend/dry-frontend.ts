@@ -8,7 +8,7 @@ import {
 } from 'grammy/types';
 import nunjucks from 'nunjucks';
 import { setTimeout } from 'timers/promises';
-import { uxConstant } from '../constant/ux-constant';
+import { uxConstant } from '../constants/ux-constant';
 
 @Injectable()
 export class DryFrontend {

@@ -28,8 +28,4 @@ export class VitrinRootRouter {
             return false;
         }
     }
-
-    public async internalError(
-        requestContext: RequestContext<Visitor>,
-    ): Promise<void> {}
 }

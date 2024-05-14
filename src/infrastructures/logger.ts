@@ -29,6 +29,20 @@ export class Logger {
         ).id.toString();
     }
 
+    public async isJoinedInLogChannel(): Promise<boolean> {
+        const getChatMemberResult = await this.grammyBot.api.getChatMember(
+            parseInt(this.logChannelTid),
+            this.grammyBot.botInfo.id,
+        );
+        if (
+            getChatMemberResult.status === 'left' ||
+            getChatMemberResult.status === 'kicked'
+        ) {
+            return false;
+        }
+        return true;
+    }
+
     public async log(message: string) {
         await this.frontend.sendSystemMessage(this.logChannelTid, 'log', {
             context: {

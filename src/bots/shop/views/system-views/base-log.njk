@@ -1,0 +1,9 @@
+{% if severity == 'log' %}
+[LOG at {{ date }}]
+
+{% block log_message %}{% endblock %}
+{% elif severity == 'warn' %}
+[WARN at {{ date }}]
+
+{% block warn_message %}{% endblock %}
+{% endif %}

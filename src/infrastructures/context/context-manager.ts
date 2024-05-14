@@ -23,11 +23,16 @@ export class ContextManager<T> {
     ): Promise<RequestContext<T>> {
         const poolClient = await this.databaseManager.createTransaction();
         const telegramContext = this.buildTelegramContext(grammyContext);
-        let user = await this.userBuilder.buildUser(
-            telegramContext,
-            poolClient,
-        );
-        return new RequestContext<T>(telegramContext, user, poolClient);
+        try {
+            let user = await this.userBuilder.buildUser(
+                telegramContext,
+                poolClient,
+            );
+            return new RequestContext<T>(telegramContext, user, poolClient);
+        } catch (e: unknown) {
+            await this.databaseManager.rollbackTransaction(poolClient);
+            throw e;
+        }
     }
 
     public buildTelegramContext(grammyContext: GrammyContext): TelegramContext {
@@ -62,6 +67,12 @@ export class ContextManager<T> {
             }
         }
 
-        return new TelegramContext(tid, text, photo, video);
+        return new TelegramContext(
+            grammyContext.me.id.toString(),
+            tid,
+            text,
+            photo,
+            video,
+        );
     }
 }

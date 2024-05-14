@@ -7,7 +7,7 @@ export class ShopRepository {
     public async createShop(
         name: string,
         fullName: string,
-        botUsername: string,
+        tid: string | null,
         botToken: string,
         onMaintenance: boolean,
         maintenanceVersion: number,
@@ -26,7 +26,7 @@ export class ShopRepository {
             shop (
                 name, 
                 full_name, 
-                bot_username, 
+                tid,
                 bot_token, 
                 on_maintenance, 
                 maintenance_version, 
@@ -45,7 +45,7 @@ export class ShopRepository {
             [
                 name,
                 fullName,
-                botUsername,
+                tid,
                 botToken,
                 onMaintenance,
                 maintenanceVersion,
@@ -62,13 +62,13 @@ export class ShopRepository {
         return this.bake(result.rows[0]);
     }
 
-    public async updateShow(shop: Shop, poolClient: PoolClient): Promise<void> {
+    public async updateShop(shop: Shop, poolClient: PoolClient): Promise<void> {
         await poolClient.query(
             `
             UPDATE shop 
             SET
                 full_name = $2, 
-                bot_username = $3, 
+                tid = $3,
                 bot_token = $4,
                 on_maintenance = $5, 
                 maintenance_version = $6, 
@@ -79,13 +79,12 @@ export class ShopRepository {
                 faq_description = $11,
                 faq_file_tid = $12,
                 owner = $13
-            )
             WHERE name = $1
             `,
             [
                 shop.name,
                 shop.fullName,
-                shop.botUsername,
+                shop.tid,
                 shop.botToken,
                 shop.onMaintenance,
                 shop.maintenanceVersion,
@@ -100,11 +99,96 @@ export class ShopRepository {
         );
     }
 
+    public async getShop(
+        name: string,
+        poolClient: PoolClient,
+    ): Promise<Shop | null> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM shop
+            WHERE name = $1
+            `,
+            [name],
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
+    public async getShopForce(
+        name: string,
+        poolClient: PoolClient,
+    ): Promise<Shop> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM shop
+            WHERE name = $1
+            `,
+            [name],
+        );
+
+        if (result.rowCount === 0) {
+            throw new Error('Database inconsistency detected.');
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
+    public async getShopByTid(
+        tid: string,
+        poolClient: PoolClient,
+    ): Promise<Shop | null> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM shop
+            WHERE tid = $1
+            `,
+            [tid],
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
+    public async getAllShops(poolClient: PoolClient): Promise<Array<Shop>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM shop
+            `,
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
+    public async deleteShop(
+        name: string,
+        poolClient: PoolClient,
+    ): Promise<void> {
+        await poolClient.query(
+            `
+            DELETE
+            FROM shop
+            WHERE name = $1
+            `,
+            [name],
+        );
+    }
+
     private bake(row: any): Shop {
         return new Shop(
             row.name,
             row.full_name,
-            row.bot_username,
+            row.tid,
             row.bot_token,
             row.on_maintenance,
             row.maintenance_version,

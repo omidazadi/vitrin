@@ -4,40 +4,35 @@ import { Visitor } from 'src/database/models/visitor';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { VitrinHomeWorkflowJumpToHomeHandler } from '../handlers/home-workflow/jump-to-home';
 import { VitrinAdminWorkflowNavigateInHandler } from '../handlers/admin-workflow/navigate-in';
+import { TcommandParser } from 'src/infrastructures/tcommand-parser';
 
 @Injectable()
 export class VitrinCommandRouter {
-    private uiPath: string;
     private homeWorkflowjumpToHomeHandler: VitrinHomeWorkflowJumpToHomeHandler;
     private adminWorkflowNavigateInHandler: VitrinAdminWorkflowNavigateInHandler;
+    private tcommandParser: TcommandParser;
     private buttonTexts: any;
 
     public constructor(
-        @Inject('UI_PATH') uiPath: string,
         homeWorkflowjumpToHomeHandler: VitrinHomeWorkflowJumpToHomeHandler,
         adminWorkflowNavigateInHandler: VitrinAdminWorkflowNavigateInHandler,
+        tcommandParser: TcommandParser,
+        @Inject('BUTTON_TEXTS') buttonTexts: any,
     ) {
-        this.uiPath = uiPath;
         this.homeWorkflowjumpToHomeHandler = homeWorkflowjumpToHomeHandler;
         this.adminWorkflowNavigateInHandler = adminWorkflowNavigateInHandler;
-    }
-
-    public async configure(): Promise<void> {
-        this.buttonTexts = JSON.parse(
-            (
-                await readFile(`${this.uiPath}/button-texts.json`, 'utf8')
-            ).toString(),
-        );
+        this.tcommandParser = tcommandParser;
+        this.buttonTexts = buttonTexts;
     }
 
     public async route(
         requestContext: RequestContext<Visitor>,
     ): Promise<boolean> {
-        if (
-            requestContext.telegramContext.text ===
-            this.buttonTexts.command.start
-        ) {
-            await this.homeWorkflowjumpToHomeHandler.handle(requestContext);
+        if (requestContext.telegramContext.text?.startsWith('/start')) {
+            await this.homeWorkflowjumpToHomeHandler.handle(
+                requestContext,
+                this.tcommandParser.parse(requestContext.telegramContext.text),
+            );
             return true;
         } else if (
             requestContext.telegramContext.text ===

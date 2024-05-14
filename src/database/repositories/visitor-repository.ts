@@ -25,6 +25,26 @@ export class VisitorRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getVisitorByTid(
+        tid: string,
+        poolClient: PoolClient,
+    ): Promise<Visitor | null> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM visitor
+            WHERE tid = $1
+            `,
+            [tid],
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
     public async createVisitor(
         tid: string,
         data: Visitor.Data,

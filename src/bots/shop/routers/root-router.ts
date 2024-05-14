@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { Customer } from '../../../database/models/customer';
 import { ShopAdminWorkflowRouter } from './admin-workflow-router';
@@ -5,8 +6,11 @@ import { ShopCheckoutWorkflowRouter } from './checkout-workflow-router';
 import { ShopHomeWorkflowRouter } from './home-workflow-router';
 import { ShopInformationWorkflowRouter } from './information-workflow-router';
 import { ShopProductWorkflowRouter } from './product-workflow-router';
+import { ShopCommandRouter } from './command-router';
 
+@Injectable()
 export class ShopRootRouter {
+    private commandRouter: ShopCommandRouter;
     private adminWorkflowRouter: ShopAdminWorkflowRouter;
     private checkoutWorkflowRouter: ShopCheckoutWorkflowRouter;
     private homeWorkflowRouter: ShopHomeWorkflowRouter;
@@ -14,12 +18,14 @@ export class ShopRootRouter {
     private productWorkflowRouter: ShopProductWorkflowRouter;
 
     public constructor(
+        commandRouter: ShopCommandRouter,
         adminWorkflowRouter: ShopAdminWorkflowRouter,
         checkoutWorkflowRouter: ShopCheckoutWorkflowRouter,
         homeWorkflowRouter: ShopHomeWorkflowRouter,
         informationWorkflowRouter: ShopInformationWorkflowRouter,
         productWorkflowRouter: ShopProductWorkflowRouter,
     ) {
+        this.commandRouter = commandRouter;
         this.adminWorkflowRouter = adminWorkflowRouter;
         this.checkoutWorkflowRouter = checkoutWorkflowRouter;
         this.homeWorkflowRouter = homeWorkflowRouter;
@@ -30,7 +36,9 @@ export class ShopRootRouter {
     public async route(
         requestContext: RequestContext<Customer>,
     ): Promise<boolean> {
-        if (await this.adminWorkflowRouter.route(requestContext)) {
+        if (await this.commandRouter.route(requestContext)) {
+            return true;
+        } else if (await this.adminWorkflowRouter.route(requestContext)) {
             return true;
         } else if (await this.checkoutWorkflowRouter.route(requestContext)) {
             return true;
@@ -44,8 +52,4 @@ export class ShopRootRouter {
             return false;
         }
     }
-
-    public async internalError(
-        requestContext: RequestContext<Customer>,
-    ): Promise<void> {}
 }

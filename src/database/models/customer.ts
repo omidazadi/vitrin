@@ -10,7 +10,7 @@ export class Customer {
     public zipCode: string | null;
     public referral: string | null;
     public maintenanceVersion: number;
-    public shop: number;
+    public shop: string;
 
     constructor(
         id: number,
@@ -22,7 +22,7 @@ export class Customer {
         zipCode: string | null,
         referral: string | null,
         maintenanceVersion: number,
-        shop: number,
+        shop: string,
     ) {
         this.id = id;
         this.tid = tid;
