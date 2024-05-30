@@ -33,7 +33,7 @@ export class VitrinAdminWorkflowNavigateInHandler {
         if (requestContext.user.tid !== this.vitrinConfig.owner) {
             await this.frontend.sendActionMessage(
                 requestContext.user.tid,
-                'common/unknown',
+                'common/unknown-error',
             );
             return;
         }

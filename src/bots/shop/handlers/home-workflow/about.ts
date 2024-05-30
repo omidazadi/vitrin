@@ -2,20 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
 import { allowedMedia } from 'src/infrastructures/allowed-media';
-import { Customer } from 'src/database/models/customer';
-import { ShopRepository } from 'src/database/repositories/shop-repository';
+import { ShopCustomer } from '../../user-builder';
 
 @Injectable()
 export class ShopHomeWorkflowAboutHandler {
     private frontend: HydratedFrontend;
-    private shopRepository: ShopRepository;
 
-    public constructor(
-        frontend: HydratedFrontend,
-        shopRepository: ShopRepository,
-    ) {
+    public constructor(frontend: HydratedFrontend) {
         this.frontend = frontend;
-        this.shopRepository = shopRepository;
     }
 
     @allowedMedia({
@@ -23,18 +17,20 @@ export class ShopHomeWorkflowAboutHandler {
         video: 'prohibited',
     })
     public async handle(
-        requestContext: RequestContext<Customer>,
+        requestContext: RequestContext<ShopCustomer>,
     ): Promise<void> {
-        const about = (
-            await this.shopRepository.getShopForce(
-                requestContext.user.shop,
-                requestContext.poolClient,
-            )
-        ).aboutDescription;
         await this.frontend.sendActionMessage(
-            requestContext.user.tid,
+            requestContext.user.customer.tid,
             'home-workflow/about',
-            { context: { description: about } },
+            {
+                photo:
+                    requestContext.user.shop.aboutFileTid === null
+                        ? undefined
+                        : requestContext.user.shop.aboutFileTid,
+                context: {
+                    description: requestContext.user.shop.aboutDescription,
+                },
+            },
         );
     }
 }

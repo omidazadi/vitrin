@@ -6,7 +6,6 @@ import { PoolClient } from 'pg';
 export class ShopRepository {
     public async createShop(
         name: string,
-        fullName: string,
         tid: string | null,
         botToken: string,
         onMaintenance: boolean,
@@ -25,7 +24,6 @@ export class ShopRepository {
             INSERT INTO
             shop (
                 name, 
-                full_name, 
                 tid,
                 bot_token, 
                 on_maintenance, 
@@ -39,12 +37,11 @@ export class ShopRepository {
                 owner
             )
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING *
             `,
             [
                 name,
-                fullName,
                 tid,
                 botToken,
                 onMaintenance,
@@ -67,23 +64,21 @@ export class ShopRepository {
             `
             UPDATE shop 
             SET
-                full_name = $2, 
-                tid = $3,
-                bot_token = $4,
-                on_maintenance = $5, 
-                maintenance_version = $6, 
-                main_description = $7, 
-                main_file_tid = $8,
-                about_description = $9,
-                about_file_tid = $10,
-                faq_description = $11,
-                faq_file_tid = $12,
-                owner = $13
+                tid = $2,
+                bot_token = $3,
+                on_maintenance = $4, 
+                maintenance_version = $5, 
+                main_description = $6, 
+                main_file_tid = $7,
+                about_description = $8,
+                about_file_tid = $9,
+                faq_description = $10,
+                faq_file_tid = $11,
+                owner = $12
             WHERE name = $1
             `,
             [
                 shop.name,
-                shop.fullName,
                 shop.tid,
                 shop.botToken,
                 shop.onMaintenance,
@@ -187,7 +182,6 @@ export class ShopRepository {
     private bake(row: any): Shop {
         return new Shop(
             row.name,
-            row.full_name,
             row.tid,
             row.bot_token,
             row.on_maintenance,

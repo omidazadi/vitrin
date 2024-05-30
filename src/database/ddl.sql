@@ -29,7 +29,6 @@ DO $$
 
             CREATE TABLE IF NOT EXISTS shop (
                 name VARCHAR(64) PRIMARY KEY,
-                full_name VARCHAR(256) NOT NULL,
                 tid VARCHAR(256),
                 bot_token VARCHAR(256) UNIQUE NOT NULL,
                 on_maintenance BOOLEAN NOT NULL,
@@ -65,8 +64,8 @@ DO $$
                 description TEXT NOT NULL,
                 file_tid VARCHAR(256),
                 parent VARCHAR(64),
-                rank INTEGER,
-                new_line BOOLEAN,
+                rank INTEGER NOT NULL,
+                new_line BOOLEAN NOT NULL,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (parent, shop) 
                     REFERENCES section (name, shop)
@@ -132,6 +131,8 @@ DO $$
             CREATE TABLE IF NOT EXISTS product (
                 name VARCHAR(64) NOT NULL,
                 full_name VARCHAR(256) NOT NULL,
+                description TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (shop) 
                     REFERENCES shop (name)
@@ -159,11 +160,12 @@ DO $$
                 PRIMARY KEY (tag, product, shop)
             );
 
-            CREATE TABLE IF NOT EXISTS variety (
+            CREATE TABLE IF NOT EXISTS option (
                 name VARCHAR(64) NOT NULL,
                 full_name VARCHAR(256) NOT NULL,
+                full_button VARCHAR(256) NOT NULL,
+                file_tid VARCHAR(256),
                 product VARCHAR(64) NOT NULL,
-                price INTEGER NOT NULL,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (product, shop) 
                     REFERENCES product (name, shop)
@@ -176,11 +178,11 @@ DO $$
                 PRIMARY KEY (name, product, shop)
             );
 
-            CREATE TABLE IF NOT EXISTS product_media (
-                id SERIAL PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS variety (
+                name VARCHAR(64) NOT NULL,
                 product VARCHAR(64) NOT NULL,
-                file_tid VARCHAR(256) NOT NULL,
-                is_main BOOLEAN NOT NULL,
+                price INTEGER NOT NULL,
+                stock INTEGER NOT NULL,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (product, shop) 
                     REFERENCES product (name, shop)
@@ -189,7 +191,55 @@ DO $$
                 FOREIGN KEY (shop) 
                     REFERENCES shop (name)
                     ON UPDATE CASCADE
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+                PRIMARY KEY (name, product, shop)
+            );
+
+            CREATE TABLE IF NOT EXISTS option_variety (
+                value VARCHAR(256) NOT NULL,
+                option VARCHAR(64) NOT NULL,
+                variety VARCHAR(64) NOT NULL,
+                product VARCHAR(64) NOT NULL,
+                shop VARCHAR(64) NOT NULL,
+                FOREIGN KEY (option, product, shop) 
+                    REFERENCES option (name, product, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (variety, product, shop) 
+                    REFERENCES variety (name, product, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (product, shop) 
+                    REFERENCES product (name, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (shop) 
+                    REFERENCES shop (name)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                PRIMARY KEY (option, variety, product, shop)
+            );
+
+            CREATE TABLE IF NOT EXISTS variety_media (
+                name VARCHAR(64) NOT NULL,
+                variety VARCHAR(64) NOT NULL,
+                product VARCHAR(64) NOT NULL,
+                file_tid VARCHAR(256) NOT NULL,
+                is_main BOOLEAN NOT NULL,
+                shop VARCHAR(64) NOT NULL,
+                FOREIGN KEY (variety, product, shop) 
+                    REFERENCES variety (name, product, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (product, shop) 
+                    REFERENCES product (name, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (shop) 
+                    REFERENCES shop (name)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                PRIMARY KEY (name, variety, product, shop)
             );
 
             CREATE TABLE IF NOT EXISTS cart_item  (
@@ -201,12 +251,12 @@ DO $$
                 FOREIGN KEY (customer) 
                     REFERENCES customer (id)
                     ON DELETE CASCADE,
-                FOREIGN KEY (product, shop) 
-                    REFERENCES product (name, shop)
-                    ON UPDATE CASCADE
-                    ON DELETE CASCADE,
                 FOREIGN KEY (variety, product, shop) 
                     REFERENCES variety (name, product, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (product, shop) 
+                    REFERENCES product (name, shop)
                     ON UPDATE CASCADE
                     ON DELETE CASCADE,
                 FOREIGN KEY (shop) 

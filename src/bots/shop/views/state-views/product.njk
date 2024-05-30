@@ -1,0 +1,19 @@
+{% if scenario == 'success' %}
+({{ currentNumber }}/{{ totalNumber }}) {{ product.fullName }}
+
+{{ product.description }}
+{% elif scenario == 'error-no-product' %}
+هیچ کالایی وجود نداره. 🚬
+{% elif scenario == 'guide' %}
+{% if options|length == 0 %}
+با دکمه‌ی «{{ buttonTexts.state.product.add_to_cart }}» کالا رو به سبد خریدت اضافه کن.
+
+با دکمه‌های «{{ buttonTexts.state.product.previous }}» و «{{ buttonTexts.state.product.next }}» به کالاهای قبلی و بعدی برو.
+{% else %}
+ابتدا {% for option in options %}{{ option.fullName }} رو با دکمه‌ی «{{ option.fullButton }}»{% if not loop.last %} و {% endif %}{% endfor %} انتخاب کن.
+
+سپس با دکمه‌ی «{{ buttonTexts.state.product.add_to_cart }}» کالا رو به سبد خریدت اضافه کن.
+
+با دکمه‌های «{{ buttonTexts.state.product.previous }}» و «{{ buttonTexts.state.product.next }}» به کالاهای قبلی و بعدی برو.
+{% endif %}
+{% endif %}

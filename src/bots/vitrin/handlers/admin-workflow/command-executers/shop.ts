@@ -8,6 +8,7 @@ import { VisitorRepository } from 'src/database/repositories/visitor-repository'
 import { allowedMedia } from 'src/infrastructures/allowed-media';
 import { BotRunner } from 'src/infrastructures/bot-runner';
 import { RequestContext } from 'src/infrastructures/context/request-context';
+import { ExpectedError } from 'src/infrastructures/errors/expected-error';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
 import { Logger } from 'src/infrastructures/logger';
 
@@ -63,13 +64,13 @@ export class VitrinAdminWorkflowShopCommandExecuter {
         requestContext: RequestContext<Visitor>,
         tokens: Array<string>,
     ) {
-        if (tokens.length !== 4) {
+        if (tokens.length !== 3) {
             await this.error(requestContext);
             return;
         }
 
         const visitor = await this.visitorRepository.getVisitorByTid(
-            tokens[3],
+            tokens[2],
             requestContext.poolClient,
         );
         if (visitor === null) {
@@ -79,9 +80,8 @@ export class VitrinAdminWorkflowShopCommandExecuter {
 
         const shop = await this.shopRepository.createShop(
             tokens[0],
-            tokens[1],
             null,
-            tokens[2],
+            tokens[1],
             false,
             1,
             null,
@@ -168,11 +168,14 @@ export class VitrinAdminWorkflowShopCommandExecuter {
         );
     }
 
-    private async error(requestContext: RequestContext<Visitor>) {
+    private async error(
+        requestContext: RequestContext<Visitor>,
+    ): Promise<never> {
         await this.frontend.sendActionMessage(
             requestContext.user.tid,
             'admin-workflow/command',
             { context: { scenario: 'error' } },
         );
+        throw new ExpectedError();
     }
 }

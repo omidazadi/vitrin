@@ -1,1 +1,5 @@
+{% if scenario == 'error' %}
 به خطای داخلی خوردم.
+{% elif scenario == 'home' %}
+{% include "../../state-views/home.njk" %}
+{% endif %}

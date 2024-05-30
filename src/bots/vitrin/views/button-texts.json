@@ -1,6 +1,5 @@
 {
     "command": {
-        "start": "/start",
         "admin_cli": "/cli"
     },
 

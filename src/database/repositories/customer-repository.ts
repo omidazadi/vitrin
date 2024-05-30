@@ -4,18 +4,22 @@ import { Customer } from '../models/customer';
 
 @Injectable()
 export class CustomerRepository {
-    public async getCustomerByTidLocking(
+    public async getCustomerByTidAndShopLocking(
         tid: string,
+        shop: string,
         poolClient: PoolClient,
     ): Promise<Customer | null> {
         const result = await poolClient.query(
             `
             SELECT *
             FROM customer
-            WHERE tid = $1
+            WHERE 
+                tid = $1
+                    AND
+                shop = $2
             FOR UPDATE
             `,
-            [tid],
+            [tid, shop],
         );
 
         if (result.rowCount === 0) {

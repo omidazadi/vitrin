@@ -14,6 +14,7 @@ import { ShopRepository } from 'src/database/repositories/shop-repository';
 import { ShopModule } from '../shop/module';
 import { NestFactory } from '@nestjs/core';
 import { BotRunner } from 'src/infrastructures/bot-runner';
+import { ExpectedError } from 'src/infrastructures/errors/expected-error';
 
 @Injectable()
 export class VitrinGateway implements GatewayInterface {
@@ -95,6 +96,11 @@ export class VitrinGateway implements GatewayInterface {
         } catch (e: unknown) {
             if (e instanceof MediaNotAllowedError) {
                 await this.unknownErrorHandler.handle(requestContext);
+                await this.databaseManager.rollbackTransaction(
+                    requestContext.poolClient,
+                );
+                return;
+            } else if (e instanceof ExpectedError) {
                 await this.databaseManager.rollbackTransaction(
                     requestContext.poolClient,
                 );

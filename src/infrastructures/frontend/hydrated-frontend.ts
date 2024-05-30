@@ -18,7 +18,9 @@ export class HydratedFrontend {
         action: string,
         options?: {
             context?: object;
+            album?: Array<string>;
             photo?: string;
+            video?: string;
         },
     ): Promise<boolean> {
         try {
@@ -39,7 +41,9 @@ export class HydratedFrontend {
         messageType: string,
         options?: {
             context?: object;
+            album?: Array<string>;
             photo?: string;
+            video?: string;
         },
     ): Promise<boolean> {
         try {

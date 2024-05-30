@@ -7,7 +7,7 @@ import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend
 import { VisitorRepository } from 'src/database/repositories/visitor-repository';
 import { VitrinConfig } from '../../configs/vitrin-config';
 import { allowedMedia } from 'src/infrastructures/allowed-media';
-import { TcommandParser } from 'src/infrastructures/tcommand-parser';
+import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 
 @Injectable()
 export class VitrinHomeWorkflowJumpToHomeHandler {

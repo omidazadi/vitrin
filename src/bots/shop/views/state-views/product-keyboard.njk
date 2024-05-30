@@ -1,0 +1,24 @@
+{% if scenario == 'success' %}
+{% elif scenario == 'error-no-product' %}
+{% elif scenario == 'guide' %}
+[
+    [
+        "{{ buttonTexts.state.product.add_to_cart }}"
+    ],
+    {% if options|length != 0 %}
+    [
+        {% for option in options %}"{{ option.fullButton }}"{% if not loop.last %},{% endif %}{% endfor %}
+    ],
+    {% endif %}
+    [
+        "{{ buttonTexts.state.product.more_pictures }}"
+    ],
+    [
+        "{{ buttonTexts.state.product.next }}",
+        "{{ buttonTexts.state.product.previous }}"
+    ],
+    [
+        "{{ buttonTexts.state.section.back }}"
+    ]
+]
+{% endif %}

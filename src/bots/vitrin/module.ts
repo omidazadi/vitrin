@@ -23,8 +23,9 @@ import { VitrinCommandRouter } from './routers/command-router';
 import { VitrinInternalErrorHandler } from './handlers/common/internal-error';
 import { VitrinUnknownErrorHandler } from './handlers/common/unknown-error';
 import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupported-media-error';
-import { TcommandParser } from 'src/infrastructures/tcommand-parser';
 import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflow/command-executers/shop';
+import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
+import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
 
 @Module({
     imports: [DatabaseModule],
@@ -81,12 +82,20 @@ import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflo
         },
         {
             provide: DryFrontend,
-            useFactory: async function (grammyBot: GrammyBot, uiPath: string) {
-                const dryFrontend = new DryFrontend(grammyBot, uiPath);
+            useFactory: async function (
+                grammyBot: GrammyBot,
+                uiPath: string,
+                buttonTexts: any,
+            ) {
+                const dryFrontend = new DryFrontend(
+                    grammyBot,
+                    uiPath,
+                    buttonTexts,
+                );
                 await dryFrontend.configure();
                 return dryFrontend;
             },
-            inject: [GrammyBot, 'UI_PATH'],
+            inject: [GrammyBot, 'UI_PATH', 'BUTTON_TEXTS'],
         },
         HydratedFrontend,
         {
@@ -113,6 +122,7 @@ import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflo
         },
         BotRunner,
         TcommandParser,
+        AcommandParser,
 
         VitrinRootRouter,
         VitrinAdminWorkflowRouter,

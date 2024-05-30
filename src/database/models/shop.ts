@@ -1,6 +1,5 @@
 export class Shop {
     public name: string;
-    public fullName: string;
     public tid: string | null;
     public botToken: string;
     public onMaintenance: boolean;
@@ -15,7 +14,6 @@ export class Shop {
 
     constructor(
         name: string,
-        fullName: string,
         tid: string | null,
         botToken: string,
         onMaintenance: boolean,
@@ -29,7 +27,6 @@ export class Shop {
         owner: number,
     ) {
         this.name = name;
-        this.fullName = fullName;
         this.tid = tid;
         this.botToken = botToken;
         this.onMaintenance = onMaintenance;

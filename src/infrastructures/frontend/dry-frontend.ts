@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Bot as GrammyBot, InlineKeyboard, Keyboard } from 'grammy';
 import {
     InlineKeyboardMarkup,
+    InputMediaPhoto,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
 } from 'grammy/types';
@@ -19,18 +20,15 @@ export class DryFrontend {
     public constructor(
         grammyBot: GrammyBot,
         @Inject('UI_PATH') uiPath: string,
+        @Inject('BUTTON_TEXTS') buttonTexts: any,
     ) {
         this.grammyBot = grammyBot;
         this.uiPath = uiPath;
+        this.buttonTexts = buttonTexts;
     }
 
     public async configure(): Promise<void> {
         nunjucks.configure({ trimBlocks: true, lstripBlocks: true });
-        this.buttonTexts = JSON.parse(
-            (
-                await readFile(`${this.uiPath}/button-texts.json`, 'utf8')
-            ).toString(),
-        );
     }
 
     public async sendActionMessage(
@@ -38,6 +36,7 @@ export class DryFrontend {
         action: string,
         options?: {
             context?: object;
+            album?: Array<string>;
             photo?: string;
             video?: string;
         },
@@ -52,6 +51,7 @@ export class DryFrontend {
             context,
         );
         await this.sliceAndSend(tid, text, replyMarkup, {
+            album: options?.album,
             photo: options?.photo,
             video: options?.video,
         });
@@ -62,6 +62,7 @@ export class DryFrontend {
         messageType: string,
         options?: {
             context?: object;
+            album?: Array<string>;
             photo?: string;
             video?: string;
         },
@@ -76,6 +77,7 @@ export class DryFrontend {
             context,
         );
         await this.sliceAndSend(tid, text, replyMarkup, {
+            album: options?.album,
             photo: options?.photo,
             video: options?.video,
         });
@@ -139,11 +141,15 @@ export class DryFrontend {
     private buildKeyboardButtons(
         prefixPath: string,
         context: object,
-    ): Keyboard | ReplyKeyboardRemove {
-        let rawKeyboardButtons = JSON.parse(
-            nunjucks.render(`${prefixPath}-keyboard.njk`, context),
-        );
+    ): Keyboard | ReplyKeyboardRemove | undefined {
+        let nunjucksRender = nunjucks
+            .render(`${prefixPath}-keyboard.njk`, context)
+            .trim();
+        if (nunjucksRender.length === 0) {
+            return undefined;
+        }
 
+        let rawKeyboardButtons = JSON.parse(nunjucksRender);
         if (rawKeyboardButtons.length === 0) {
             return { remove_keyboard: true };
         }
@@ -162,10 +168,13 @@ export class DryFrontend {
     private buildInlineButtons(
         prefixPath: string,
         context: object,
-    ): InlineKeyboard {
+    ): InlineKeyboard | undefined {
         let rawInlineButtons = JSON.parse(
             nunjucks.render(`${prefixPath}-inline.njk`, context),
         );
+        if (rawInlineButtons.length === 0) {
+            return undefined;
+        }
 
         let inlineButtons = new InlineKeyboard();
         for (let buttonRow of rawInlineButtons) {
@@ -180,10 +189,13 @@ export class DryFrontend {
     private buildUrlButtons(
         prefixPath: string,
         context: object,
-    ): InlineKeyboard {
+    ): InlineKeyboard | undefined {
         let rawUrlButtons = JSON.parse(
             nunjucks.render(`${prefixPath}-url.njk`, context),
         );
+        if (rawUrlButtons.length === 0) {
+            return undefined;
+        }
 
         let urlButtons = new InlineKeyboard();
         for (let buttonRow of rawUrlButtons) {
@@ -203,14 +215,19 @@ export class DryFrontend {
             | ReplyKeyboardRemove
             | InlineKeyboardMarkup
             | undefined,
-        media: { photo?: string; video?: string },
+        media: { album?: Array<string>; photo?: string; video?: string },
     ): Promise<void> {
+        if (typeof media.album !== 'undefined' && media.album.length === 0) {
+            media.album = undefined;
+        }
+
         let sliceSize: number;
         if (
-            typeof media.photo === 'string' ||
-            typeof media.video === 'string'
+            typeof media.album !== 'undefined' ||
+            typeof media.photo !== 'undefined' ||
+            typeof media.video !== 'undefined'
         ) {
-            sliceSize = uxConstant.MediaMessageSize;
+            sliceSize = uxConstant.mediaMessageSize;
         } else {
             sliceSize = uxConstant.plainMessageSize;
         }
@@ -218,19 +235,49 @@ export class DryFrontend {
         let isFirst = true;
         while (isFirst || text.length > 0) {
             let sliced = '';
-            [sliced, text] = this.slice(text, sliceSize);
+            [sliced, text] = this.sliceText(text, sliceSize);
 
             if (!isFirst) {
                 await setTimeout(uxConstant.consecutiveMessageDelay);
             }
 
-            if (isFirst && typeof media.photo === 'string') {
+            if (isFirst && typeof media.album !== 'undefined') {
+                let isFirstAlbum = true;
+                while (media.album.length > 0) {
+                    let slicedAlbum: Array<string> = [];
+                    [slicedAlbum, media.album] = this.sliceAlbum(
+                        media.album,
+                        uxConstant.albumSize,
+                    );
+
+                    let convertedAlbum;
+                    if (media.album.length === 0) {
+                        convertedAlbum = this.toInputMediaArray(
+                            slicedAlbum,
+                            sliced === '' ? undefined : sliced,
+                        );
+                    } else {
+                        convertedAlbum = this.toInputMediaArray(slicedAlbum);
+                    }
+
+                    if (!isFirstAlbum) {
+                        await setTimeout(uxConstant.consecutiveMessageDelay);
+                    }
+
+                    await this.grammyBot.api.sendMediaGroup(
+                        parseInt(tid),
+                        convertedAlbum,
+                    );
+
+                    isFirstAlbum = false;
+                }
+            } else if (isFirst && typeof media.photo !== 'undefined') {
                 await this.grammyBot.api.sendPhoto(parseInt(tid), media.photo, {
                     caption: sliced === '' ? undefined : sliced,
                     reply_markup: text === '' ? replyMarkup : undefined,
                     parse_mode: 'HTML',
                 });
-            } else if (isFirst && typeof media.video === 'string') {
+            } else if (isFirst && typeof media.video !== 'undefined') {
                 await this.grammyBot.api.sendVideo(parseInt(tid), media.video, {
                     caption: sliced === '' ? undefined : sliced,
                     reply_markup: text === '' ? replyMarkup : undefined,
@@ -247,13 +294,13 @@ export class DryFrontend {
         }
     }
 
-    private slice(text: string, sliceSize: number): [string, string] {
+    private sliceText(text: string, sliceSize: number): [string, string] {
         if (text === '') {
             return ['', ''];
         }
 
         let sliced = '';
-        for (let char of text) {
+        for (const char of text) {
             if (Buffer.byteLength(sliced + char, 'utf8') <= sliceSize) {
                 sliced += char;
             } else {
@@ -266,5 +313,54 @@ export class DryFrontend {
         }
 
         return [sliced, ''];
+    }
+
+    private sliceAlbum(
+        album: Array<string>,
+        sliceSize: number,
+    ): [Array<string>, Array<string>] {
+        if (album.length === 0) {
+            return [[], []];
+        }
+
+        let sliced: Array<string> = [];
+        for (const fileTid of album) {
+            if (sliced.length + 1 <= sliceSize) {
+                sliced.push(fileTid);
+            } else {
+                if (sliced.length === 0) {
+                    throw new Error('Internal error inside frontend.');
+                } else {
+                    return [sliced, album.slice(sliced.length, album.length)];
+                }
+            }
+        }
+
+        return [sliced, []];
+    }
+
+    private toInputMediaArray(
+        album: Array<string>,
+        caption?: string,
+    ): Array<InputMediaPhoto> {
+        let result = [];
+        for (const fileTid of album) {
+            if (result.length === 0) {
+                result.push(this.toInputMedia(fileTid, caption));
+            } else {
+                result.push(this.toInputMedia(fileTid));
+            }
+        }
+
+        return result;
+    }
+
+    private toInputMedia(fileTid: string, caption?: string): InputMediaPhoto {
+        return {
+            type: 'photo',
+            media: fileTid,
+            caption: caption,
+            parse_mode: 'HTML',
+        };
     }
 }

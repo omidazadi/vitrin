@@ -1,18 +1,21 @@
-export class ProductMedia {
-    public id: number;
+export class VarietyMedia {
+    public name: string;
+    public variety: string;
     public product: string;
     public fileTid: string;
     public isMain: boolean;
     public shop: string;
 
     constructor(
-        id: number,
+        name: string,
+        variety: string,
         product: string,
         fileTid: string,
         isMain: boolean,
         shop: string,
     ) {
-        this.id = id;
+        this.name = name;
+        this.variety = variety;
         this.product = product;
         this.fileTid = fileTid;
         this.isMain = isMain;

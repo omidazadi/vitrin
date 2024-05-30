@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { RequestContext } from 'src/infrastructures/context/request-context';
-import { Customer } from '../../../database/models/customer';
 import { ShopAdminWorkflowRouter } from './admin-workflow-router';
 import { ShopCheckoutWorkflowRouter } from './checkout-workflow-router';
 import { ShopHomeWorkflowRouter } from './home-workflow-router';
 import { ShopInformationWorkflowRouter } from './information-workflow-router';
 import { ShopProductWorkflowRouter } from './product-workflow-router';
 import { ShopCommandRouter } from './command-router';
+import { ShopCustomer } from '../user-builder';
 
 @Injectable()
 export class ShopRootRouter {
@@ -34,7 +34,7 @@ export class ShopRootRouter {
     }
 
     public async route(
-        requestContext: RequestContext<Customer>,
+        requestContext: RequestContext<ShopCustomer>,
     ): Promise<boolean> {
         if (await this.commandRouter.route(requestContext)) {
             return true;

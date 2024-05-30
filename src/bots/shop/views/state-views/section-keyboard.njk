@@ -1,0 +1,11 @@
+{% if scenario == 'success' %}
+[
+    {% for section in childSections %}
+    {% if loop.first %}[{% endif %}"{{ section.fullName }}"{% if section.newLine %}],[{% elif not loop.last %},{% endif %}{% if loop.last %}],{% endif %}
+    {% endfor %}
+    [
+        "{{ buttonTexts.state.section.back }}"
+    ]
+]
+{% elif scenario == 'error-no-such-section' %}
+{% endif %}

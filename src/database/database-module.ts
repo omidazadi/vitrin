@@ -13,6 +13,9 @@ import { VarietyRepository } from './repositories/variety-repository';
 import { VisitorRepository } from './repositories/visitor-repository';
 import { PostgresConfig } from 'src/infrastructures/configs/postgres-config';
 import { validate } from 'class-validator';
+import { OptionRepository } from './repositories/option-repository';
+import { OptionVarietyRepository } from './repositories/option-variety-repository';
+import { VarietyMediaRepository } from './repositories/variety-media-repository';
 
 @Module({
     providers: [
@@ -39,6 +42,8 @@ import { validate } from 'class-validator';
         },
         CartItemRepository,
         CustomerRepository,
+        OptionRepository,
+        OptionVarietyRepository,
         ProductRepository,
         ReferralPartnerRepository,
         SectionRepository,
@@ -46,6 +51,7 @@ import { validate } from 'class-validator';
         TagProductRepository,
         TagRepository,
         TagSectionRepository,
+        VarietyMediaRepository,
         VarietyRepository,
         VisitorRepository,
     ],
@@ -53,6 +59,8 @@ import { validate } from 'class-validator';
         DatabaseManager,
         CartItemRepository,
         CustomerRepository,
+        OptionRepository,
+        OptionVarietyRepository,
         ProductRepository,
         ReferralPartnerRepository,
         SectionRepository,
@@ -60,6 +68,7 @@ import { validate } from 'class-validator';
         TagProductRepository,
         TagRepository,
         TagSectionRepository,
+        VarietyMediaRepository,
         VarietyRepository,
         VisitorRepository,
     ],

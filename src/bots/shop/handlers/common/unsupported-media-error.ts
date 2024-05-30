@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Customer } from 'src/database/models/customer';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
+import { ShopCustomer } from '../../user-builder';
 
 @Injectable()
 export class ShopUnsupportedMediaErrorHandler {
@@ -12,10 +12,10 @@ export class ShopUnsupportedMediaErrorHandler {
     }
 
     public async handle(
-        requestContext: RequestContext<Customer>,
+        requestContext: RequestContext<ShopCustomer>,
     ): Promise<void> {
         await this.frontend.sendActionMessage(
-            requestContext.user.tid,
+            requestContext.user.customer.tid,
             'common/unsupported-media-error',
         );
     }

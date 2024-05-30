@@ -45,6 +45,26 @@ export class VisitorRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getVisitorForce(
+        id: number,
+        poolClient: PoolClient,
+    ): Promise<Visitor> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM visitor
+            WHERE id = $1
+            `,
+            [id],
+        );
+
+        if (result.rowCount === 0) {
+            throw new Error('Database inconsistency detected.');
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
     public async createVisitor(
         tid: string,
         data: Visitor.Data,

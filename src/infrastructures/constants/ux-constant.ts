@@ -1,12 +1,14 @@
 class UxConstant {
     public consecutiveMessageDelay: number;
     public plainMessageSize: number;
-    public MediaMessageSize: number;
+    public mediaMessageSize: number;
+    public albumSize: number;
 
     public constructor() {
         this.consecutiveMessageDelay = 500;
         this.plainMessageSize = 3072;
-        this.MediaMessageSize = 768;
+        this.mediaMessageSize = 768;
+        this.albumSize = 10;
     }
 }
 
