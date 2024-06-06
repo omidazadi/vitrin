@@ -17,6 +17,7 @@ export class HydratedFrontend {
         tid: string,
         action: string,
         options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url';
             context?: object;
             album?: Array<string>;
             photo?: string;
@@ -40,6 +41,7 @@ export class HydratedFrontend {
         tid: string,
         messageType: string,
         options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url';
             context?: object;
             album?: Array<string>;
             photo?: string;

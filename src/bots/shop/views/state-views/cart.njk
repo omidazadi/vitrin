@@ -1,0 +1,8 @@
+سبد خرید شما:
+
+{% for item in cart %}
+{{ loop.index }}. {{ item[3].fullName }} {% for optionValue in item[2] %}{{ optionValue.option.fullName }} {{ optionValue.value }}{% if not loop.last %} {% endif %}{% endfor %}: بها {{ item[1].price }} تومان
+{% endfor %}
+
+هزینه‌ی حمل‌ونقل (پست): {{ shippingFee }} تومان
+مجموع بها: {{ sum }} تومان

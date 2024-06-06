@@ -15,9 +15,11 @@ import { ShopModule } from '../shop/module';
 import { NestFactory } from '@nestjs/core';
 import { BotRunner } from 'src/infrastructures/bot-runner';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
+import { BotConfig } from 'src/infrastructures/configs/bot-config';
 
 @Injectable()
 export class VitrinGateway implements GatewayInterface {
+    private botConfig: BotConfig;
     private contextManager: ContextManager<Visitor>;
     private databaseManager: DatabaseManager;
     private router: VitrinRootRouter;
@@ -26,9 +28,10 @@ export class VitrinGateway implements GatewayInterface {
     private unknownErrorHandler: VitrinUnknownErrorHandler;
     private unsupportedMediaErrorHandler: VitrinUnsupportedMediaErrorHandler;
     private shopRepository: ShopRepository;
-    runningShops: { [name: string]: INestApplicationContext };
+    private runningShops: { [name: string]: INestApplicationContext };
 
     public constructor(
+        botConfig: BotConfig,
         contextManager: ContextManager<Visitor>,
         databaseManager: DatabaseManager,
         router: VitrinRootRouter,
@@ -40,6 +43,7 @@ export class VitrinGateway implements GatewayInterface {
         @Inject('RUNNING_SHOPS')
         runningShops: { [name: string]: INestApplicationContext },
     ) {
+        this.botConfig = botConfig;
         this.contextManager = contextManager;
         this.databaseManager = databaseManager;
         this.router = router;
@@ -107,7 +111,9 @@ export class VitrinGateway implements GatewayInterface {
                 return;
             }
 
-            await this.logger.warn(e!.toString());
+            if (this.botConfig.env === 'production') {
+                await this.logger.warn(e!.toString());
+            }
             await this.databaseManager.rollbackTransaction(
                 requestContext.poolClient,
             );
@@ -118,6 +124,10 @@ export class VitrinGateway implements GatewayInterface {
             await this.databaseManager.commitTransaction(
                 requestContext.poolClient,
             );
+
+            if (this.botConfig.env === 'development') {
+                throw e;
+            }
         }
     }
 }

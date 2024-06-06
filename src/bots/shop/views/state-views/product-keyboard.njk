@@ -1,13 +1,10 @@
-{% if scenario == 'success' %}
-{% elif scenario == 'error-no-product' %}
-{% elif scenario == 'guide' %}
 [
     [
-        "{{ buttonTexts.state.product.add_to_cart }}"
+        "{{ buttonTexts.state.product.add_to_cart }}"{% if alreadyHave == true %}, "{{ buttonTexts.state.product.remove_from_cart }}"{% endif %}
     ],
-    {% if options|length != 0 %}
+    {% if optionValues|length != 0 %}
     [
-        {% for option in options %}"{{ option.fullButton }}"{% if not loop.last %},{% endif %}{% endfor %}
+        {% for optionValue in optionValues %}"{{ optionValue.option.fullButton }}"{% if not loop.last %},{% endif %}{% endfor %}
     ],
     {% endif %}
     [
@@ -21,4 +18,3 @@
         "{{ buttonTexts.state.section.back }}"
     ]
 ]
-{% endif %}

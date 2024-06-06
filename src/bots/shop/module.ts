@@ -23,7 +23,7 @@ import { ShopInformationWorkflowRouter } from './routers/information-workflow-ro
 import { ShopProductWorkflowRouter } from './routers/product-workflow-router';
 import { ShopHomeWorkflowAboutHandler } from './handlers/home-workflow/about';
 import { ShopHomeWorkflowFaqHandler } from './handlers/home-workflow/faq';
-import { ShopCheckoutWorkflowRouter } from './routers/checkout-workflow-router';
+import { ShopCartWorkflowRouter } from './routers/cart-workflow-router';
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
 import { ShopAdminWorkflowCommandHandler } from './handlers/admin-workflow/command';
@@ -42,14 +42,33 @@ import { ShopAdminWorkflowTagCommandExecuter } from './handlers/admin-workflow/c
 import { ShopProductWorkflowNavigateInHandler } from './handlers/product-workflow/navigate-in';
 import { ShopProductWorkflowSectionDownHandler } from './handlers/product-workflow/section-down';
 import { ShopProductWorkflowSectionUpHandler } from './handlers/product-workflow/section-up';
-import { ShopProductWorkflowSetReferralHandler } from './handlers/product-workflow/set-referral';
-import { ShopProductWorkflowStartHandler } from './handlers/product-workflow/start';
-import { ShopProductWorkflowSectionHandlingHelper } from './handlers/product-workflow/helpers/section-handling';
+import { ShopCommandWorkflowStartHandler } from './handlers/command-workflow/start';
 import { ShopAdminWorkflowProductCommandExecuter } from './handlers/admin-workflow/command-executers/product/product';
 import { ShopAdminWorkflowProductVarietyCommandExecuter } from './handlers/admin-workflow/command-executers/product/variety/variety';
 import { ShopAdminWorkflowProductVarietyMediaCommandExecuter } from './handlers/admin-workflow/command-executers/product/variety/media';
 import { ShopAdminWorkflowProductOptionCommandExecuter } from './handlers/admin-workflow/command-executers/product/option';
 import { ShopAdminWorkflowProductTagCommandExecuter } from './handlers/admin-workflow/command-executers/product/tag';
+import { ShopProductWorkflowNavigateProductHandler } from './handlers/product-workflow/navigate-product';
+import { ShopProductWorkflowMorePicturesHandler } from './handlers/product-workflow/more-pictures';
+import { ShopProductWorkflowNavigateOptionHandler } from './handlers/product-workflow/navigate-option';
+import { ShopProductWorkflowSelectOptionHandler } from './handlers/product-workflow/select-option';
+import { ShopProductWorkflowProductCameraHelper } from './handlers/product-workflow/helpers/product-camera';
+import { ShopProductWorkflowRendererHelper } from './handlers/product-workflow/helpers/renderer';
+import { ShopProductWorkflowSectionChainBuilderHelper } from './handlers/product-workflow/helpers/section-chain-builder';
+import { ShopProductWorkflowSectionTransitionerHelper } from './handlers/product-workflow/helpers/section-transitioner';
+import { BotConfig } from 'src/infrastructures/configs/bot-config';
+import { ShopProductWorkflowProductUnavailableFallbackHelper } from './handlers/product-workflow/helpers/product-unavailable-fallback';
+import { ShopProductWorkflowAddToCartHandler } from './handlers/product-workflow/add-to-cart';
+import { ShopProductWorkflowRemoveFromCartHandler } from './handlers/product-workflow/remove-from-cart';
+import { ShopCommandWorkflowSetReferralHandler } from './handlers/command-workflow/set-referral';
+import { ShopAdminWorkflowReferralPartnerCommandExecuter } from './handlers/admin-workflow/command-executers/referral-partner';
+import { ShopCartWorkflowNavigateInHandler } from './handlers/cart-workflow/navigate-in';
+import { ShopInformationWorkflowFillEntryHandler } from './handlers/information-workflow/fill-entry';
+import { ShopInformationWorkflowNavigateInHandler } from './handlers/information-workflow/navigate-in';
+import { ShopInformationWorkflowNavigateOutHandler } from './handlers/information-workflow/navigate-out';
+import { ShopInformationWorkflowRedoHandler } from './handlers/information-workflow/redo';
+import { ShopCartWorkflowNavigateCartHandler } from './handlers/cart-workflow/navigate-cart';
+import { ShopCartWorkflowNavigateOutHandler } from './handlers/cart-workflow/navigate-out';
 
 @Module({})
 export class ShopModule {
@@ -93,6 +112,17 @@ export class ShopModule {
                             throw new Error(validationErrors[0].toString());
                         }
                         return loggerConfig;
+                    },
+                },
+                {
+                    provide: BotConfig,
+                    useFactory: async function () {
+                        const botConfig = new BotConfig();
+                        const validationErrors = await validate(botConfig);
+                        if (validationErrors.length > 0) {
+                            throw new Error(validationErrors[0].toString());
+                        }
+                        return botConfig;
                     },
                 },
 
@@ -154,7 +184,7 @@ export class ShopModule {
 
                 ShopRootRouter,
                 ShopAdminWorkflowRouter,
-                ShopCheckoutWorkflowRouter,
+                ShopCartWorkflowRouter,
                 ShopCommandRouter,
                 ShopHomeWorkflowRouter,
                 ShopInformationWorkflowRouter,
@@ -164,16 +194,29 @@ export class ShopModule {
                 ShopAdminWorkflowCommandHandler,
                 ShopAdminWorkflowNavigateInHandler,
                 ShopAdminWorkflowNavigateOutHandler,
+                ShopProductWorkflowAddToCartHandler,
+                ShopProductWorkflowMorePicturesHandler,
                 ShopProductWorkflowNavigateInHandler,
+                ShopProductWorkflowNavigateOptionHandler,
+                ShopProductWorkflowNavigateProductHandler,
+                ShopProductWorkflowRemoveFromCartHandler,
                 ShopProductWorkflowSectionDownHandler,
                 ShopProductWorkflowSectionUpHandler,
-                ShopProductWorkflowSetReferralHandler,
-                ShopProductWorkflowStartHandler,
+                ShopProductWorkflowSelectOptionHandler,
+                ShopCommandWorkflowSetReferralHandler,
+                ShopCommandWorkflowStartHandler,
+                ShopCartWorkflowNavigateCartHandler,
+                ShopCartWorkflowNavigateOutHandler,
+                ShopCartWorkflowNavigateInHandler,
                 ShopInternalErrorHandler,
                 ShopOnMaintenanceHandler,
                 ShopUnknownErrorHandler,
                 ShopUnsupportedMediaErrorHandler,
                 ShopUpdatedHandler,
+                ShopInformationWorkflowFillEntryHandler,
+                ShopInformationWorkflowNavigateInHandler,
+                ShopInformationWorkflowNavigateOutHandler,
+                ShopInformationWorkflowRedoHandler,
                 ShopAdminWorkflowHomeCommandExecuter,
                 ShopAdminWorkflowHomeFaqCommandExecuter,
                 ShopAdminWorkflowHomeAboutCommandExecuter,
@@ -181,13 +224,18 @@ export class ShopModule {
                 ShopAdminWorkflowSectionCommandExecuter,
                 ShopAdminWorkflowSectionTagCommandExecuter,
                 ShopAdminWorkflowMaintenanceCommandExecuter,
+                ShopAdminWorkflowReferralPartnerCommandExecuter,
                 ShopAdminWorkflowTagCommandExecuter,
                 ShopAdminWorkflowProductCommandExecuter,
                 ShopAdminWorkflowProductVarietyCommandExecuter,
                 ShopAdminWorkflowProductVarietyMediaCommandExecuter,
                 ShopAdminWorkflowProductOptionCommandExecuter,
                 ShopAdminWorkflowProductTagCommandExecuter,
-                ShopProductWorkflowSectionHandlingHelper,
+                ShopProductWorkflowProductCameraHelper,
+                ShopProductWorkflowProductUnavailableFallbackHelper,
+                ShopProductWorkflowRendererHelper,
+                ShopProductWorkflowSectionChainBuilderHelper,
+                ShopProductWorkflowSectionTransitionerHelper,
             ],
         };
     }

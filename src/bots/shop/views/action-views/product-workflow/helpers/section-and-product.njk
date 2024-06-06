@@ -1,0 +1,43 @@
+{% if scenario == 'home:land' %}
+{% include "../../../state-views/home.njk" %}
+{% elif scenario == 'home:no-root-section' %}
+فروشگاه هنوز حاضر نیست.
+{% elif scenario == 'home:no-product-nor-section' %}
+هیچ کالایی وجود نداره. 🚬
+{% elif scenario == 'home:no-product-nor-section:out-of-stock' %}
+هیچ کالایی وجود نداره. 🚬
+{% elif scenario == 'section:land' %}
+{% include "../../../state-views/section.njk" %}
+{% elif scenario == 'section:no-product' %}
+هیچ کالایی وجود نداره. 🚬
+{% elif scenario == 'section:no-product:out-of-stock' %}
+هیچ کالایی وجود نداره. 🚬
+{% elif scenario == 'section:no-such-section' %}
+چنین بخشی وجود نداره.
+{% elif scenario == 'product:land' %}
+{% set guide = 'y' %}
+{% include "../../../state-views/product.njk" %}
+{% elif scenario == 'product:land:out-of-stock' %}
+{% set guide = 'y' %}
+{% include "../../../state-views/product.njk" %}
+{% elif scenario == 'product:land:invalid-option' %}
+{% set invalidOption = 'y' %}
+{% include "../../../state-views/product.njk" %}
+{% elif scenario == 'product:stay:unknown' %}
+{% include "../../common/unknown-error.njk" %}
+{% elif scenario == 'product:stay:all-options-are-required' %}
+باید ابتدا {% for optionValue in optionValues %}{{ optionValue.option.fullName }}{% if not loop.last %} و {% endif %}{% endfor %} رو انتخاب کنی و سپس کالا رو به سبد اضافه کنی.
+{% elif scenario == 'product:stay:added-to-cart' %}
+کالای {{ product.fullName }} {% for optionValue in optionValues %}{{ optionValue.option.fullName }} {{ optionValue.value }}{% if not loop.last %} {% endif %}{% endfor %} به سبد خریدت اضافه شد.
+{% elif scenario == 'product:stay:deleted-from-cart' %}
+{{ removedNumber }} کالا از سبد خرید حذف {% if removedNumber == 1 %}شد{% else %}شدن{% endif %}.
+{% elif scenario == 'product:stay:cart-is-full' %}
+سبد خریدت دیگه بیشتر از این جا نداره.
+{% elif scenario == 'product:land:option-selected' %}
+{% set optionSelected = 'y' %}
+{% include "../../../state-views/product.njk" %}
+{% elif scenario == 'option:land' %}
+{% include "../../../state-views/option.njk" %}
+{% elif scenario == 'helper:out-of-stock' %}
+این کالا دیگه موجود نیست.
+{% endif %}

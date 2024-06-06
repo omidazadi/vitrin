@@ -154,6 +154,27 @@ export class ShopRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getShopByTidLocking(
+        tid: string,
+        poolClient: PoolClient,
+    ): Promise<Shop | null> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM shop
+            WHERE tid = $1
+            FOR SHARE
+            `,
+            [tid],
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
     public async getAllShops(poolClient: PoolClient): Promise<Array<Shop>> {
         const result = await poolClient.query(
             `

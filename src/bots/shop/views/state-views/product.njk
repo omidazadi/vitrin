@@ -1,16 +1,36 @@
-{% if scenario == 'success' %}
 ({{ currentNumber }}/{{ totalNumber }}) {{ product.fullName }}
 
+{% if optionValues|length != 0 %}
+{% for optionValue in optionValues %}{{ optionValue.option.fullName }}: {% if optionValue.value != null %}{{ optionValue.value }}{% else %}-{% endif %}
+
+{% endfor %}
+{% endif %}
+بها: {{ price }} تومان
+
 {{ product.description }}
-{% elif scenario == 'error-no-product' %}
-هیچ کالایی وجود نداره. 🚬
-{% elif scenario == 'guide' %}
-{% if options|length == 0 %}
+{% if invalidOption == 'y' %}
+<><>
+{{ o.option.fullName }} رو یا نادرست وارد کردی و یا دیگه موجودی نداره.
+{% endif %}
+{% if optionSelected == 'y' %}
+{% if back == 'y' %}
+{% set guide = 'y' %}
+{% elif erase == 'y' %}
+<><>
+{{ o.option.fullName }} پاک شد.
+{% else %}
+<><>
+{{ o.option.fullName }} {{ o.value }} انتخاب شد.
+{% endif %}
+{% endif %}
+{% if guide == 'y' %}
+<><>
+{% if optionValues|length == 0 %}
 با دکمه‌ی «{{ buttonTexts.state.product.add_to_cart }}» کالا رو به سبد خریدت اضافه کن.
 
 با دکمه‌های «{{ buttonTexts.state.product.previous }}» و «{{ buttonTexts.state.product.next }}» به کالاهای قبلی و بعدی برو.
 {% else %}
-ابتدا {% for option in options %}{{ option.fullName }} رو با دکمه‌ی «{{ option.fullButton }}»{% if not loop.last %} و {% endif %}{% endfor %} انتخاب کن.
+ابتدا {% for optionValue in optionValues %}{{ optionValue.option.fullName }} کالا رو با دکمه‌ی «{{ optionValue.option.fullButton }}»{% if not loop.last %} و {% endif %}{% endfor %} انتخاب کن.
 
 سپس با دکمه‌ی «{{ buttonTexts.state.product.add_to_cart }}» کالا رو به سبد خریدت اضافه کن.
 

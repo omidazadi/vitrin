@@ -3,29 +3,28 @@ import { RequestContext } from 'src/infrastructures/context/request-context';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
 import { allowedMedia } from 'src/infrastructures/allowed-media';
 import { ShopCustomer } from '../../user-builder';
-import { SectionRepository } from 'src/database/repositories/section-repository';
-import { ShopProductWorkflowSectionHandlingHelper } from './helpers/section-handling';
 import { instanceToInstance } from 'class-transformer';
-import { Section } from 'src/database/models/section';
 import { CustomerRepository } from 'src/database/repositories/customer-repository';
+import { ShopProductWorkflowSectionChainBuilderHelper } from './helpers/section-chain-builder';
+import { SectionRepository } from 'src/database/repositories/section-repository';
 
 @Injectable()
 export class ShopProductWorkflowSectionUpHandler {
     private frontend: HydratedFrontend;
     private customerRepository: CustomerRepository;
     private sectionRepository: SectionRepository;
-    private sectionHandlingHelper: ShopProductWorkflowSectionHandlingHelper;
+    private sectionChainBuilderHelper: ShopProductWorkflowSectionChainBuilderHelper;
 
     public constructor(
         frontend: HydratedFrontend,
         customerRepository: CustomerRepository,
         sectionRepository: SectionRepository,
-        sectionHandlingHelper: ShopProductWorkflowSectionHandlingHelper,
+        sectionChainBuilderHelper: ShopProductWorkflowSectionChainBuilderHelper,
     ) {
         this.frontend = frontend;
         this.customerRepository = customerRepository;
         this.sectionRepository = sectionRepository;
-        this.sectionHandlingHelper = sectionHandlingHelper;
+        this.sectionChainBuilderHelper = sectionChainBuilderHelper;
     }
 
     @allowedMedia({
@@ -35,35 +34,18 @@ export class ShopProductWorkflowSectionUpHandler {
     public async handle(
         requestContext: RequestContext<ShopCustomer>,
     ): Promise<void> {
-        if (requestContext.telegramContext.text === null) {
-            await this.frontend.sendActionMessage(
-                requestContext.user.customer.tid,
-                'product-workflow/section-down',
-                { context: { scenario: 'section:error-no-such-section' } },
+        const sectionChain =
+            await this.sectionChainBuilderHelper.buildSectionChain(
+                requestContext,
+                requestContext.user.customer.data.section,
             );
-            return;
-        }
-
-        const customer = instanceToInstance(requestContext.user.customer);
-        let sectionChain: Array<Section> = [];
-        for (const sectionName of customer.data.sections) {
-            const section = await this.sectionRepository.getSection(
-                sectionName,
-                requestContext.user.shop.name,
-                requestContext.poolClient,
-            );
-            if (section === null) {
-                throw new Error('Inconsistent section chain detected.');
-            }
-
-            sectionChain.push(section);
-        }
         sectionChain.pop();
 
+        const shopCustomer = instanceToInstance(requestContext.user);
         if (sectionChain.length === 0) {
-            customer.data = { state: 'home' };
+            shopCustomer.customer.data = { state: 'home' };
             await this.customerRepository.updateCustomer(
-                customer,
+                shopCustomer.customer,
                 requestContext.poolClient,
             );
             await this.frontend.sendActionMessage(
@@ -75,7 +57,7 @@ export class ShopProductWorkflowSectionUpHandler {
                             ? undefined
                             : requestContext.user.shop.mainFileTid,
                     context: {
-                        scenario: 'section:home',
+                        scenario: 'home:land',
                         description: requestContext.user.shop.mainDescription,
                     },
                 },
@@ -83,11 +65,30 @@ export class ShopProductWorkflowSectionUpHandler {
             return;
         }
 
-        await this.sectionHandlingHelper.sectionHandling(
-            requestContext,
-            customer,
+        shopCustomer.customer.data = {
+            state: 'section',
+            section: sectionChain[sectionChain.length - 1].name,
+        };
+        await this.customerRepository.updateCustomer(
+            shopCustomer.customer,
+            requestContext.poolClient,
+        );
+        const section = sectionChain[sectionChain.length - 1];
+        const childSections = await this.sectionRepository.getChildSections(
+            section.name,
+            section.shop,
+            requestContext.poolClient,
+        );
+        await this.frontend.sendActionMessage(
+            requestContext.user.customer.tid,
             'product-workflow/section-up',
-            sectionChain,
+            {
+                context: {
+                    scenario: 'section:land',
+                    section: section,
+                    childSections: childSections,
+                },
+            },
         );
     }
 }

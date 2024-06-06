@@ -1,0 +1,42 @@
+{% if scenario == 'home:land' %}
+{% include "../../../state-views/home-keyboard.njk" %}
+{% elif scenario == 'home:no-root-section' %}
+{% include "../../../state-views/home-keyboard.njk" %}
+{% elif scenario == 'home:no-product-nor-section' %}
+{% include "../../../state-views/home-keyboard.njk" %}
+{% elif scenario == 'home:no-product-nor-section:out-of-stock' %}
+{% include "../../../state-views/home-keyboard.njk" %}
+{% elif scenario == 'section:land' %}
+{% include "../../../state-views/section-keyboard.njk" %}
+{% elif scenario == 'section:no-product' %}
+{% include "../../../state-views/section-keyboard.njk" %}
+{% elif scenario == 'section:no-product:out-of-stock' %}
+{% include "../../../state-views/section-keyboard.njk" %}
+{% elif scenario == 'section:no-such-section' %}
+{% include "../../../state-views/section-keyboard.njk" %}
+{% elif scenario == 'product:land' %}
+{% set guide = 'y' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:land:out-of-stock' %}
+{% set guide = 'y' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:land:invalid-option' %}
+{% set invalidOption = 'y' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:stay:unknown' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:stay:all-options-are-required' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:stay:added-to-cart' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:stay:deleted-from-cart' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:stay:cart-is-full' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'product:land:option-selected' %}
+{% set optionSelected = 'y' %}
+{% include "../../../state-views/product-keyboard.njk" %}
+{% elif scenario == 'option:land' %}
+{% include "../../../state-views/option-keyboard.njk" %}
+{% elif scenario == 'helper:out-of-stock' %}
+{% endif %}

@@ -111,6 +111,27 @@ export class VarietyMediaRepository {
         );
     }
 
+    public async deleteAllVarietyMedia(
+        variety: string,
+        product: string,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<void> {
+        await poolClient.query(
+            `
+            DELETE
+            FROM variety_media
+            WHERE
+                variety = $1
+                    AND
+                product = $2
+                    AND
+                shop = $3
+            `,
+            [variety, product, shop],
+        );
+    }
+
     private bake(row: any): VarietyMedia {
         return new VarietyMedia(
             row.name,

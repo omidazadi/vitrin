@@ -1,0 +1,5 @@
+{% if scenario == 'checkout-notification' %}
+سبد خریدت {{ cartSize }} کالا داره. با فشردن دکمه‌ی زیر، می‌تونی سبد خریدت رو مشاهده و بعد خریدت رو تکمیل کنی.
+{% else %}
+{% include "./helpers/section-and-product.njk" %}
+{% endif %}

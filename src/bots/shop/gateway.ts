@@ -17,9 +17,11 @@ import { ShopUpdatedHandler } from './handlers/common/updated';
 import { VisitorRepository } from 'src/database/repositories/visitor-repository';
 import { ShopCustomer } from './user-builder';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
+import { BotConfig } from 'src/infrastructures/configs/bot-config';
 
 export class ShopGateway implements GatewayInterface {
     private shopName: string;
+    private botConfig: BotConfig;
     private grammyBot: GrammyBot;
     private contextManager: ContextManager<ShopCustomer>;
     private databaseManager: DatabaseManager;
@@ -35,6 +37,7 @@ export class ShopGateway implements GatewayInterface {
 
     public constructor(
         @Inject('NAME') shopName: string,
+        botConfig: BotConfig,
         grammyBot: GrammyBot,
         contextManager: ContextManager<ShopCustomer>,
         databaseManager: DatabaseManager,
@@ -49,6 +52,7 @@ export class ShopGateway implements GatewayInterface {
         visitorRepository: VisitorRepository,
     ) {
         this.shopName = shopName;
+        this.botConfig = botConfig;
         this.grammyBot = grammyBot;
         this.contextManager = contextManager;
         this.databaseManager = databaseManager;
@@ -172,7 +176,9 @@ export class ShopGateway implements GatewayInterface {
                 return;
             }
 
-            await this.logger.warn(e!.toString());
+            if (this.botConfig.env === 'production') {
+                await this.logger.warn(e!.toString());
+            }
             await this.databaseManager.rollbackTransaction(
                 requestContext.poolClient,
             );
@@ -183,6 +189,10 @@ export class ShopGateway implements GatewayInterface {
             await this.databaseManager.commitTransaction(
                 requestContext.poolClient,
             );
+
+            if (this.botConfig.env === 'development') {
+                throw e;
+            }
         }
     }
 }

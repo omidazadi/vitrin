@@ -47,7 +47,8 @@ DO $$
             CREATE TABLE IF NOT EXISTS referral_partner (
                 name VARCHAR(64) NOT NULL,
                 visitor INTEGER NOT NULL,
-                fee INTEGER NOT NULL,
+                fee REAL NOT NULL,
+                payment_data TEXT,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (visitor) 
                     REFERENCES visitor (id),
@@ -246,7 +247,7 @@ DO $$
                 customer INTEGER NOT NULL,
                 product VARCHAR(64) NOT NULL,
                 variety VARCHAR(64) NOT NULL,
-                count INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL,
                 shop VARCHAR(64) NOT NULL,
                 FOREIGN KEY (customer) 
                     REFERENCES customer (id)
@@ -262,8 +263,67 @@ DO $$
                 FOREIGN KEY (shop) 
                     REFERENCES shop (name)
                     ON UPDATE CASCADE
+                    ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS payment (
+                id SERIAL PRIMARY KEY, 
+                method VARCHAR(64) NOT NULL,
+                status VARCHAR(256) NOT NULL,
+                sum INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS purchase (
+                id SERIAL PRIMARY KEY, 
+                payment_id INTEGER NOT NULL,
+                customer INTEGER NOT NULL,
+                status VARCHAR(256) NOT NULL,
+                shipping_fee INTEGER NOT NULL,
+                sum INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                shop VARCHAR(64) NOT NULL,
+                FOREIGN KEY (payment_id) 
+                    REFERENCES payment (id)
+                    ON DELETE SET NULL,
+                FOREIGN KEY (customer) 
+                    REFERENCES customer (id)
+                    ON DELETE SET NULL,
+                FOREIGN KEY (shop) 
+                    REFERENCES shop (name)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS purchase_item  (
+                purchase_id INTEGER NOT NULL,
+                product VARCHAR(64) NOT NULL,
+                variety VARCHAR(64) NOT NULL,
+                price INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                shop VARCHAR(64) NOT NULL,
+                FOREIGN KEY (purchase_id) 
+                    REFERENCES purchase (id)
                     ON DELETE CASCADE,
-                PRIMARY KEY (customer, product, variety, shop)
+                FOREIGN KEY (variety, product, shop) 
+                    REFERENCES variety (name, product, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL,
+                FOREIGN KEY (product, shop) 
+                    REFERENCES product (name, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL,
+                FOREIGN KEY (shop) 
+                    REFERENCES shop (name)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS jibit_payment (
+                payment_id INTEGER PRIMARY KEY,
+                FOREIGN KEY (payment_id) 
+                    REFERENCES payment (id)
+                    ON DELETE CASCADE
             );
 
             UPDATE meta_data

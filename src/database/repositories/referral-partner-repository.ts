@@ -6,20 +6,21 @@ import { ReferralPartner } from '../models/referral-partner';
 export class ReferralPartnerRepository {
     public async createReferralPartner(
         name: string,
-        visitor: string,
+        visitor: number,
         fee: number,
+        paymentData: string | null,
         shop: string,
         poolClient: PoolClient,
     ): Promise<ReferralPartner> {
         const result = await poolClient.query(
             `
             INSERT INTO
-            referral_partner (name, visitor, fee, shop)
+            referral_partner (name, visitor, fee, payment_data, shop)
             VALUES
-                ($1, $2, $3, $4)
+                ($1, $2, $3, $4, $5)
             RETURNING *
             `,
-            [name, visitor, fee, shop],
+            [name, visitor, fee, paymentData, shop],
         );
 
         return this.bake(result.rows[0]);
@@ -32,13 +33,18 @@ export class ReferralPartnerRepository {
         await poolClient.query(
             `
             UPDATE referral_partner
-            SET fee = $2
+            SET fee = $2, payment_data = $3
             WHERE
                 name = $1
                     AND
-                shop = $3
+                shop = $4
             `,
-            [referralPartner.name, referralPartner.fee, referralPartner.shop],
+            [
+                referralPartner.name,
+                referralPartner.fee,
+                referralPartner.paymentData,
+                referralPartner.shop,
+            ],
         );
     }
 
@@ -66,6 +72,23 @@ export class ReferralPartnerRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getAllReferralPartners(
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<Array<ReferralPartner>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM referral_partner
+            WHERE 
+                shop = $1
+            `,
+            [shop],
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
     public async deleteReferralPartner(
         name: string,
         shop: string,
@@ -85,6 +108,12 @@ export class ReferralPartnerRepository {
     }
 
     private bake(row: any): ReferralPartner {
-        return new ReferralPartner(row.name, row.visitor, row.fee, row.shop);
+        return new ReferralPartner(
+            row.name,
+            row.visitor,
+            row.fee,
+            row.payment_data,
+            row.shop,
+        );
     }
 }

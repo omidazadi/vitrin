@@ -1,0 +1,13 @@
+[
+    {% if customer.data.next == 'cart' %}
+    [
+        "{{ buttonTexts.state.information_document.continue }}"
+    ],
+    {% endif %}
+    [
+        "{{ buttonTexts.state.information_document.redo }}"
+    ],
+    [
+        "{{ buttonTexts.state.information_document.back }}"
+    ]
+]

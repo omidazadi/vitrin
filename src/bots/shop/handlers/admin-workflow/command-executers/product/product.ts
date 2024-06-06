@@ -73,7 +73,7 @@ export class ShopAdminWorkflowProductCommandExecuter {
             );
         } else if (tokens[0] === 'show') {
             if (tokens.length >= 2 && tokens[1] === 'all') {
-                await this.showAllProduct(
+                await this.showAllProducts(
                     requestContext,
                     tokens.slice(2, tokens.length),
                 );
@@ -236,7 +236,7 @@ export class ShopAdminWorkflowProductCommandExecuter {
         photo: 'prohibited',
         video: 'prohibited',
     })
-    public async showAllProduct(
+    public async showAllProducts(
         requestContext: RequestContext<ShopCustomer>,
         tokens: Array<string>,
     ) {

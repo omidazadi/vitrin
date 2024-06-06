@@ -4,6 +4,7 @@ export type ShopState =
     | 'information-document'
     | 'section'
     | 'product'
+    | 'option'
     | 'cart'
     | 'cart-item'
     | 'checkout'

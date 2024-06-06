@@ -1,10 +1,10 @@
 [
-    {% if default_value != null %}
+    {% if (entry == "firstName" and customer.firstName != null) or (entry == "lastName" and customer.lastName != null) or (entry == "address" and customer.address != null) or (entry == "zipCode" and customer.zipCode != null) %}
     [
         "{{ buttonTexts.state.information_questionnaire.do_not_change }}"
     ],
     {% endif %}
     [
-        "{{ buttonTexts.state.information_questionnaire.back }}""
+        "{{ buttonTexts.state.information_questionnaire.back }}"
     ]
 ]

@@ -1,0 +1,9 @@
+[
+    {% for row in values %}
+    [{% for value in row %}"{{ value }}"{% if not loop.last %},{% endif %}{% endfor %}],
+    {% endfor %}
+    [
+        "{{ buttonTexts.state.option.back }}",
+        "{{ buttonTexts.state.option.erase }}"
+    ]
+]

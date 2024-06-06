@@ -4,23 +4,31 @@ import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend
 import { allowedMedia } from 'src/infrastructures/allowed-media';
 import { ShopCustomer } from '../../user-builder';
 import { SectionRepository } from 'src/database/repositories/section-repository';
-import { ShopProductWorkflowSectionHandlingHelper } from './helpers/section-handling';
+import { CustomerRepository } from 'src/database/repositories/customer-repository';
+import { ShopProductWorkflowSectionTransitionerHelper } from './helpers/section-transitioner';
+import { ShopProductWorkflowRendererHelper } from './helpers/renderer';
 import { instanceToInstance } from 'class-transformer';
 
 @Injectable()
 export class ShopProductWorkflowNavigateInHandler {
     private frontend: HydratedFrontend;
     private sectionRepository: SectionRepository;
-    private sectionHandlingHelper: ShopProductWorkflowSectionHandlingHelper;
+    private customerRepository: CustomerRepository;
+    private sectionTransitionerHelper: ShopProductWorkflowSectionTransitionerHelper;
+    private rendererHelper: ShopProductWorkflowRendererHelper;
 
     public constructor(
         frontend: HydratedFrontend,
         sectionRepository: SectionRepository,
-        sectionHandlingHelper: ShopProductWorkflowSectionHandlingHelper,
+        customerRepository: CustomerRepository,
+        sectionTransitionerHelper: ShopProductWorkflowSectionTransitionerHelper,
+        rendererHelper: ShopProductWorkflowRendererHelper,
     ) {
         this.frontend = frontend;
         this.sectionRepository = sectionRepository;
-        this.sectionHandlingHelper = sectionHandlingHelper;
+        this.customerRepository = customerRepository;
+        this.sectionTransitionerHelper = sectionTransitionerHelper;
+        this.rendererHelper = rendererHelper;
     }
 
     @allowedMedia({
@@ -39,18 +47,28 @@ export class ShopProductWorkflowNavigateInHandler {
             await this.frontend.sendActionMessage(
                 requestContext.user.customer.tid,
                 'product-workflow/navigate-in',
-                { context: { scenario: 'section:error-no-root-section' } },
+                { context: { scenario: 'home:no-root-section' } },
             );
             return;
         }
 
-        const section = nullSections[0];
-        const customer = instanceToInstance(requestContext.user.customer);
-        await this.sectionHandlingHelper.sectionHandling(
+        const sectionChain = [nullSections[0]];
+        const shopCustomer = instanceToInstance(requestContext.user);
+        const transitionResult =
+            await this.sectionTransitionerHelper.transition(
+                requestContext,
+                shopCustomer,
+                sectionChain,
+            );
+        await this.customerRepository.updateCustomer(
+            shopCustomer.customer,
+            requestContext.poolClient,
+        );
+        await this.rendererHelper.render(
             requestContext,
-            customer,
+            shopCustomer,
             'product-workflow/navigate-in',
-            [section],
+            transitionResult,
         );
     }
 }

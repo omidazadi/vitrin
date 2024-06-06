@@ -1,0 +1,10 @@
+<b>مشخصات گیرنده</b>
+
+نام: {{ customer.firstName }}
+نام خانوادگی: {{ customer.lastName }}
+نشانی: {{ customer.address }}
+کد پستی: {{ customer.zipCode }}
+
+{% if customer.data.next == 'cart' %}
+اگر مشخصات گیرنده رو تایید می‌کنی، روی دکمه‌ی «{{ buttonTexts.state.information_document.continue }}» بزن.
+{% endif %}

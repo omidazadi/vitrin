@@ -9,12 +9,14 @@ import { ShopAdminWorkflowTagCommandExecuter } from './command-executers/tag';
 import { ShopCustomer } from '../../user-builder';
 import { ShopAdminWorkflowProductCommandExecuter } from './command-executers/product/product';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
+import { ShopAdminWorkflowReferralPartnerCommandExecuter } from './command-executers/referral-partner';
 
 @Injectable()
 export class ShopAdminWorkflowCommandHandler {
     private frontend: HydratedFrontend;
     private homeCommandExecuter: ShopAdminWorkflowHomeCommandExecuter;
     private maintenanceCommandExecuter: ShopAdminWorkflowMaintenanceCommandExecuter;
+    private referralPartnerCommandExecuter: ShopAdminWorkflowReferralPartnerCommandExecuter;
     private sectionCommandExecuter: ShopAdminWorkflowSectionCommandExecuter;
     private tagCommandExecuter: ShopAdminWorkflowTagCommandExecuter;
     private productCommandExecuter: ShopAdminWorkflowProductCommandExecuter;
@@ -24,6 +26,7 @@ export class ShopAdminWorkflowCommandHandler {
         frontend: HydratedFrontend,
         homeCommandExecuter: ShopAdminWorkflowHomeCommandExecuter,
         maintenanceCommandExecuter: ShopAdminWorkflowMaintenanceCommandExecuter,
+        referralPartnerCommandExecuter: ShopAdminWorkflowReferralPartnerCommandExecuter,
         sectionCommandExecuter: ShopAdminWorkflowSectionCommandExecuter,
         tagCommandExecuter: ShopAdminWorkflowTagCommandExecuter,
         productCommandExecuter: ShopAdminWorkflowProductCommandExecuter,
@@ -32,6 +35,7 @@ export class ShopAdminWorkflowCommandHandler {
         this.frontend = frontend;
         this.homeCommandExecuter = homeCommandExecuter;
         this.maintenanceCommandExecuter = maintenanceCommandExecuter;
+        this.referralPartnerCommandExecuter = referralPartnerCommandExecuter;
         this.sectionCommandExecuter = sectionCommandExecuter;
         this.tagCommandExecuter = tagCommandExecuter;
         this.productCommandExecuter = productCommandExecuter;
@@ -53,6 +57,11 @@ export class ShopAdminWorkflowCommandHandler {
             );
         } else if (tokens[0] === 'maintenance') {
             await this.maintenanceCommandExecuter.handle(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
+        } else if (tokens[0] === 'referral-partner') {
+            await this.referralPartnerCommandExecuter.handle(
                 requestContext,
                 tokens.slice(1, tokens.length),
             );

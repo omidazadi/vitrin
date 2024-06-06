@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import { Product } from '../models/product';
 import { Tag } from '../models/tag';
 import { Section } from '../models/section';
+import { Variety } from '../models/variety';
 
 @Injectable()
 export class ProductRepository {
@@ -123,12 +124,11 @@ export class ProductRepository {
                 tp.tag AS name, tp.shop AS shop
             FROM 
                 product p
-                    LEFT JOIN 
-                tag_product tp
+                    JOIN tag_product tp
                     ON
-                    p.name = tp.product
-                        AND
-                    p.shop = tp.shop
+                        p.name = tp.product
+                            AND
+                        p.shop = tp.shop
             WHERE
                 p.name = $1
                     AND
@@ -188,9 +188,10 @@ export class ProductRepository {
         return result.rows.map((row) => this.bake(row));
     }
 
-    public async getMainVarietyMediaOfProduct(
+    public async getAvailableProductVarietyMedia(
         name: string,
         options: Array<{ option: string; value: string }>,
+        isMain: boolean,
         shop: string,
         poolClient: PoolClient,
     ): Promise<Array<string>> {
@@ -201,17 +202,25 @@ export class ProductRepository {
             FROM 
                 product p
                     JOIN variety v
-                        ON p.name = v.product
+                        ON
+                            p.name = v.product
+                                AND
+                            p.shop = v.shop
                     JOIN variety_media vm
-                        ON v.name = vm.variety
+                        ON 
+                            v.name = vm.variety
+                                AND
+                            v.product = vm.product
+                                AND
+                            v.shop = vm.shop
             WHERE
                 p.name = $1
                     AND
-                p.shop = $3
+                p.shop = $4
                     AND
                 v.stock > 0
                     AND
-                vm.is_main = TRUE
+                vm.is_main = $3
                     AND
                 NOT EXISTS (
                     SELECT 1
@@ -233,10 +242,63 @@ export class ProductRepository {
                             )
                 )
             `,
-            [name, options, shop],
+            [name, options, isMain, shop],
         );
 
         return result.rows.map((row) => row.file_tid);
+    }
+
+    public async getAvailableProductPrice(
+        name: string,
+        options: Array<{ option: string; value: string }>,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<number> {
+        const result = await poolClient.query(
+            `
+            SELECT
+                MIN(v.price) as price
+            FROM 
+                product p
+                    JOIN variety v
+                        ON
+                            p.name = v.product
+                                AND
+                            p.shop = v.shop
+            WHERE
+                p.name = $1
+                    AND
+                p.shop = $3
+                    AND
+                v.stock > 0
+                    AND
+                NOT EXISTS (
+                    SELECT 1
+                    FROM option_variety ov
+                        WHERE
+                            ov.variety = v.name
+                                AND
+                            ov.product = v.product
+                                AND
+                            ov.shop = v.shop
+                                AND
+                            EXISTS (
+                                SELECT 1
+                                FROM UNNEST($2::VARCHAR[]) qo
+                                WHERE
+                                    (qo::JSONB) ->> 'option' = ov.option
+                                        AND
+                                    (qo::JSONB) ->> 'value' != ov.value
+                            )
+                )
+            GROUP BY
+                p.name,
+                p.shop
+            `,
+            [name, options, shop],
+        );
+
+        return result.rows[0].price;
     }
 
     private bake(row: any): Product {

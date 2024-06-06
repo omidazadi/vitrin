@@ -13,9 +13,9 @@ export class TcommandParser {
         }
 
         const args = trimmedCommand.split('-');
-        const kvStrings = args[1].split(',');
+        const kvStrings = args.slice(1, args.length);
         const data: { [key: string]: string } = {};
-        for (const kvString in kvStrings) {
+        for (const kvString of kvStrings) {
             const [key, value] = kvString.split('=');
             data[key] = value;
         }

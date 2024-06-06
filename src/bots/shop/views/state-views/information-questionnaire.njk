@@ -1,21 +1,25 @@
-{% if entry == "first_name" %}
+{% if entry == "firstName" %}
 نام کوچکت رو وارد کن.
-{% if default != null %}
+{% if customer.firstName != null %}
 
-مقدار حال حاضر <b>{{ default }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی {{ buttonTexts.state.information_questionnaire.do_not_change }} بزن.
-{% elif entry == "last_name" %}
+مقدار حال حاضر <b>{{ customer.firstName }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
+{% endif %}
+{% elif entry == "lastName" %}
 نام خانوادگی‌ات رو وارد کن.
-{% if default_value != null %}
+{% if customer.lastName != null %}
 
-مقدار حال حاضر <b>{{ default_value }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی {{ buttonTexts.state.information_questionnaire.do_not_change }} بزن.
+مقدار حال حاضر <b>{{ customer.lastName }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
+{% endif %}
 {% elif entry == "address" %}
 نشانی‌ات رو وارد کن (شامل استان و شهر و پلاک و شماره‌ی واحد).
-{% if default_value != null %}
+{% if customer.address != null %}
 
-مقدار حال حاضر <b>{{ default_value }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی {{ buttonTexts.state.information_questionnaire.do_not_change }} بزن.
-{% elif entry == "zip_code" %}
+مقدار حال حاضر <b>{{ customer.address }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
+{% endif %}
+{% elif entry == "zipCode" %}
 کد پستی‌ات رو وارد کن.
-{% if default_value != null %}
+{% if customer.zipCode != null %}
 
-مقدار حال حاضر <b>{{ default_value }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی {{ buttonTexts.state.information_questionnaire.do_not_change }} بزن.
+مقدار حال حاضر <b>{{ customer.zipCode }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
+{% endif %}
 {% endif %}

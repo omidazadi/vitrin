@@ -1,29 +1,32 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RequestContext } from 'src/infrastructures/context/request-context';
-import { ShopProductWorkflowStartHandler } from '../handlers/product-workflow/start';
-import { ShopProductWorkflowSetReferralHandler } from '../handlers/product-workflow/set-referral';
+import { ShopCommandWorkflowStartHandler } from '../handlers/command-workflow/start';
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { ShopAdminWorkflowNavigateInHandler } from '../handlers/admin-workflow/navigate-in';
 import { ShopCustomer } from '../user-builder';
+import { ShopCommandWorkflowSetReferralHandler } from '../handlers/command-workflow/set-referral';
+import { ShopCartWorkflowNavigateInHandler } from '../handlers/cart-workflow/navigate-in';
 
 @Injectable()
 export class ShopCommandRouter {
-    private productWorkflowStartHandler: ShopProductWorkflowStartHandler;
-    private productWorkflowSetReferralHandler: ShopProductWorkflowSetReferralHandler;
+    private startHandler: ShopCommandWorkflowStartHandler;
+    private setReferralHandler: ShopCommandWorkflowSetReferralHandler;
+    private cartWorkflowNavigateInHandler: ShopCartWorkflowNavigateInHandler;
     private adminWorkflowNavigateInHandler: ShopAdminWorkflowNavigateInHandler;
     private tcommandParser: TcommandParser;
     private buttonTexts: any;
 
     public constructor(
-        productWorkflowStartHandler: ShopProductWorkflowStartHandler,
-        productWorkflowSetReferralHandler: ShopProductWorkflowSetReferralHandler,
+        startHandler: ShopCommandWorkflowStartHandler,
+        setReferralHandler: ShopCommandWorkflowSetReferralHandler,
+        cartWorkflowNavigateInHandler: ShopCartWorkflowNavigateInHandler,
         adminWorkflowNavigateInHandler: ShopAdminWorkflowNavigateInHandler,
         tcommandParser: TcommandParser,
         @Inject('BUTTON_TEXTS') buttonTexts: any,
     ) {
-        this.productWorkflowStartHandler = productWorkflowStartHandler;
-        this.productWorkflowSetReferralHandler =
-            productWorkflowSetReferralHandler;
+        this.startHandler = startHandler;
+        this.setReferralHandler = setReferralHandler;
+        this.cartWorkflowNavigateInHandler = cartWorkflowNavigateInHandler;
         this.adminWorkflowNavigateInHandler = adminWorkflowNavigateInHandler;
         this.tcommandParser = tcommandParser;
         this.buttonTexts = buttonTexts;
@@ -38,16 +41,16 @@ export class ShopCommandRouter {
             );
 
             if (tcommandArgs === null) {
-                await this.productWorkflowStartHandler.handle(
+                await this.startHandler.handle(requestContext, tcommandArgs);
+                return true;
+            } else if (tcommandArgs.opcode === 0) {
+                await this.setReferralHandler.handle(
                     requestContext,
                     tcommandArgs,
                 );
                 return true;
-            } else if (tcommandArgs.opcode === 0) {
-                await this.productWorkflowSetReferralHandler.handle(
-                    requestContext,
-                    tcommandArgs,
-                );
+            } else if (tcommandArgs.opcode === 1) {
+                await this.cartWorkflowNavigateInHandler.handle(requestContext);
                 return true;
             } else {
                 return false;

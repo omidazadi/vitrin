@@ -111,6 +111,7 @@ export class SectionRepository {
                 full_name = $2
                     AND
                 shop = $3
+            FOR SHARE
             `,
             [parent, fullName, shop],
         );

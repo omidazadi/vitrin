@@ -324,6 +324,13 @@ export class ShopAdminWorkflowProductVarietyCommandExecuter {
         requestContext: RequestContext<ShopCustomer>,
         variety: Variety,
     ): Promise<string> {
-        return `Product:${variety.product}\n\nName:${variety.name}\n\nPrice:${variety.price}\n\nStock:${variety.stock}`;
+        const optionVarieties =
+            await this.optionVarietyRepository.getVarietyOptionVarieties(
+                variety.name,
+                variety.product,
+                variety.shop,
+                requestContext.poolClient,
+            );
+        return `Product:${variety.product}\n\nName:${variety.name}\n\nOptions:${optionVarieties.map((optionVariety) => optionVariety.option + '=' + optionVariety.value).join(',')}\n\nPrice:${variety.price}\n\nStock:${variety.stock}`;
     }
 }

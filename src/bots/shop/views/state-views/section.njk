@@ -1,9 +1,5 @@
-{% if scenario == 'success' %}
 {% if section.description !== '' %}
 {{ section.description|safe }}
 {% else %}
 این صفحه خالیه!
-{% endif %}
-{% elif scenario == 'error-no-such-section' %}
-چنین بخشی وجود نداره.
 {% endif %}

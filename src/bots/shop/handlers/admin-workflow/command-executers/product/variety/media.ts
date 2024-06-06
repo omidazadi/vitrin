@@ -48,6 +48,11 @@ export class ShopAdminWorkflowProductVarietyMediaCommandExecuter {
                 requestContext,
                 tokens.slice(1, tokens.length),
             );
+        } else if (tokens[0] === 'copy') {
+            await this.copyMedia(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
         } else {
             await this.error(requestContext);
         }
@@ -196,6 +201,51 @@ export class ShopAdminWorkflowProductVarietyMediaCommandExecuter {
             media.shop,
             requestContext.poolClient,
         );
+
+        await this.frontend.sendActionMessage(
+            requestContext.user.customer.tid,
+            'admin-workflow/command',
+            { context: { scenario: 'done' } },
+        );
+    }
+
+    @allowedMedia({
+        photo: 'prohibited',
+        video: 'prohibited',
+    })
+    public async copyMedia(
+        requestContext: RequestContext<ShopCustomer>,
+        tokens: Array<string>,
+    ) {
+        if (tokens.length !== 4) {
+            await this.error(requestContext);
+            return;
+        }
+
+        await this.varietyMediaRepository.deleteAllVarietyMedia(
+            tokens[3],
+            tokens[2],
+            requestContext.user.shop.name,
+            requestContext.poolClient,
+        );
+
+        const allMedia = await this.varietyMediaRepository.getAllVarietyMedia(
+            tokens[1],
+            tokens[0],
+            requestContext.user.shop.name,
+            requestContext.poolClient,
+        );
+        for (const media of allMedia) {
+            await this.varietyMediaRepository.createVarietyMedia(
+                media.name,
+                tokens[3],
+                tokens[2],
+                media.fileTid,
+                media.isMain,
+                media.shop,
+                requestContext.poolClient,
+            );
+        }
 
         await this.frontend.sendActionMessage(
             requestContext.user.customer.tid,

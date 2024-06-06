@@ -24,7 +24,7 @@ export class ShopUserBuilder implements UserBuilderInterface<ShopCustomer> {
         telegramContext: TelegramContext,
         poolClient: PoolClient,
     ): Promise<ShopCustomer> {
-        const shop = await this.shopRepository.getShopByTid(
+        const shop = await this.shopRepository.getShopByTidLocking(
             telegramContext.me,
             poolClient,
         );

@@ -26,6 +26,7 @@ import { VitrinUnsupportedMediaErrorHandler } from './handlers/common/unsupporte
 import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflow/command-executers/shop';
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
+import { BotConfig } from 'src/infrastructures/configs/bot-config';
 
 @Module({
     imports: [DatabaseModule],
@@ -69,6 +70,17 @@ import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
                     throw new Error(validationErrors[0].toString());
                 }
                 return loggerConfig;
+            },
+        },
+        {
+            provide: BotConfig,
+            useFactory: async function () {
+                const botConfig = new BotConfig();
+                const validationErrors = await validate(botConfig);
+                if (validationErrors.length > 0) {
+                    throw new Error(validationErrors[0].toString());
+                }
+                return botConfig;
             },
         },
 

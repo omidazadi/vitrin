@@ -35,6 +35,7 @@ export class DryFrontend {
         tid: string,
         action: string,
         options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url';
             context?: object;
             album?: Array<string>;
             photo?: string;
@@ -49,6 +50,9 @@ export class DryFrontend {
         const replyMarkup = await this.buildButtons(
             `${this.uiPath}/action-views/${action}`,
             context,
+            {
+                forcedType: options?.forcedType,
+            },
         );
         await this.sliceAndSend(tid, text, replyMarkup, {
             album: options?.album,
@@ -61,6 +65,7 @@ export class DryFrontend {
         tid: string,
         messageType: string,
         options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url';
             context?: object;
             album?: Array<string>;
             photo?: string;
@@ -75,6 +80,9 @@ export class DryFrontend {
         const replyMarkup = await this.buildButtons(
             `${this.uiPath}/system-views/${messageType}`,
             context,
+            {
+                forcedType: options?.forcedType,
+            },
         );
         await this.sliceAndSend(tid, text, replyMarkup, {
             album: options?.album,
@@ -297,6 +305,20 @@ export class DryFrontend {
     private sliceText(text: string, sliceSize: number): [string, string] {
         if (text === '') {
             return ['', ''];
+        }
+
+        const position = text.indexOf('<><>');
+        if (position !== -1) {
+            let sliced = text.slice(0, position);
+            if (Buffer.byteLength(sliced, 'utf8') <= sliceSize) {
+                return [sliced, text.slice(sliced.length + 4, text.length)];
+            } else {
+                let [secondSlice, dummy] = this.sliceText(sliced, sliceSize);
+                return [
+                    secondSlice,
+                    text.slice(secondSlice.length, text.length),
+                ];
+            }
         }
 
         let sliced = '';

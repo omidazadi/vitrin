@@ -90,6 +90,29 @@ export class OptionVarietyRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getVarietyOptionVarieties(
+        variety: string,
+        product: string,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<Array<OptionVariety>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM option_variety
+            WHERE
+                variety = $1
+                    AND
+                product = $2
+                    AND
+                shop = $3
+            `,
+            [variety, product, shop],
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
     public async deleteOptionVariety(
         option: string,
         variety: string,
