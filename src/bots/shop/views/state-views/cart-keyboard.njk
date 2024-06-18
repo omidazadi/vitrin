@@ -1,7 +1,9 @@
 [
+    {% if cart|length > 0 %}
     [
         "{{ buttonTexts.state.cart.pay }}"
     ],
+    {% endif %}
     [
         "{{ buttonTexts.state.cart.back }}"
     ]

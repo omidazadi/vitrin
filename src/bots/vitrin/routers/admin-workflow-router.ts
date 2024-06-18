@@ -1,4 +1,3 @@
-import { readFile } from 'fs/promises';
 import { Inject, Injectable } from '@nestjs/common';
 import { Visitor } from 'src/database/models/visitor';
 import { RequestContext } from 'src/infrastructures/context/request-context';

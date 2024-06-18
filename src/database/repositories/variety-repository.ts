@@ -147,6 +147,61 @@ export class VarietyRepository {
         return result.rows.map((row) => this.bake(row));
     }
 
+    public async getCartVarietiesLocking(
+        customer: number,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<Array<Variety>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM variety
+            WHERE
+                EXISTS (
+                    SELECT 1
+                    FROM cart_item
+                    WHERE 
+                        customer = $1
+                             AND
+                        shop = $2
+                )
+                    AND
+                shop = $2
+            FOR UPDATE
+            `,
+            [customer, shop],
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
+    public async getCartVarieties(
+        customer: number,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<Array<Variety>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM variety
+            WHERE
+                EXISTS (
+                    SELECT 1
+                    FROM cart_item
+                    WHERE 
+                        customer = $1
+                             AND
+                        shop = $2
+                )
+                    AND
+                shop = $2
+            `,
+            [customer, shop],
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
     public async getAvailableProductVarieties(
         product: string,
         options: Array<{ option: string; value: string }>,

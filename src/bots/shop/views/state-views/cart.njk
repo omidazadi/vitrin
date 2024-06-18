@@ -1,8 +1,12 @@
-سبد خرید شما:
+<b>سبد خرید شما</b>
 
+{% if cart|length == 0 %}
+هیچ کالایی در سبد خریدت نیست.
+{% else %}
 {% for item in cart %}
-{{ loop.index }}. {{ item[3].fullName }} {% for optionValue in item[2] %}{{ optionValue.option.fullName }} {{ optionValue.value }}{% if not loop.last %} {% endif %}{% endfor %}: بها {{ item[1].price }} تومان
+{{ loop.index }}. {{ item[3].fullName }} {% for optionValue in item[2] %}{{ optionValue.option.fullName }} {{ optionValue.value }}{% if not loop.last %} {% endif %}{% endfor %}{% if item[4] == false %} (ناموجود){% endif %}: بها {% if item[4] == false %}0{% else %}{{ item[1].price }}{% endif %} تومان
 {% endfor %}
 
 هزینه‌ی حمل‌ونقل (پست): {{ shippingFee }} تومان
 مجموع بها: {{ sum }} تومان
+{% endif %}

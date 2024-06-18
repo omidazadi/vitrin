@@ -6,21 +6,25 @@ import { allowedMedia } from 'src/infrastructures/allowed-media';
 import { CustomerRepository } from 'src/database/repositories/customer-repository';
 import { ShopCustomer } from '../../user-builder';
 import { VisitorRepository } from 'src/database/repositories/visitor-repository';
+import { ShopCommandWorkflowTriggerExecuterHelper } from './helpers/trigger-executer';
 
 @Injectable()
-export class ShopAdminWorkflowNavigateInHandler {
+export class ShopCommandWorkflowToCliHandler {
     private frontend: HydratedFrontend;
     private customerRepository: CustomerRepository;
     private visitorRepository: VisitorRepository;
+    private triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper;
 
     public constructor(
         frontend: HydratedFrontend,
         customerRepository: CustomerRepository,
         visitorRepository: VisitorRepository,
+        triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper,
     ) {
         this.frontend = frontend;
         this.customerRepository = customerRepository;
         this.visitorRepository = visitorRepository;
+        this.triggerExecuterHelper = triggerExecuterHelper;
     }
 
     @allowedMedia({
@@ -41,6 +45,8 @@ export class ShopAdminWorkflowNavigateInHandler {
             );
             return;
         }
+
+        await this.triggerExecuterHelper.executeTrigger(requestContext);
 
         const customer = instanceToInstance(requestContext.user.customer);
         customer.data = { state: 'admin-cli' };

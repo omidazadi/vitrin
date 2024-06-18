@@ -17,20 +17,52 @@ export class HydratedFrontend {
         tid: string,
         action: string,
         options?: {
-            forcedType?: 'keyboard' | 'inline' | 'url';
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            replyTo?: string;
             context?: object;
             album?: Array<string>;
             photo?: string;
             video?: string;
         },
-    ): Promise<boolean> {
+    ): Promise<string | null> {
         try {
-            await this.dryFrontend.sendActionMessage(tid, action, options);
-            return true;
+            return await this.dryFrontend.sendActionMessage(
+                tid,
+                action,
+                options,
+            );
         } catch (e: unknown) {
             if (e instanceof GrammyError) {
                 await this.logger.warn(e.toString());
-                return false;
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public async modifyActionMessage(
+        userTid: string,
+        messageTid: string,
+        action: string,
+        options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            context?: object;
+            photo?: string;
+            video?: string;
+        },
+    ): Promise<void> {
+        try {
+            await this.dryFrontend.modifyActionMessage(
+                userTid,
+                messageTid,
+                action,
+                options,
+            );
+        } catch (e: unknown) {
+            if (e instanceof GrammyError) {
+                await this.logger.warn(e.toString());
+                return;
             } else {
                 throw e;
             }
@@ -41,20 +73,24 @@ export class HydratedFrontend {
         tid: string,
         messageType: string,
         options?: {
-            forcedType?: 'keyboard' | 'inline' | 'url';
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            replyTo?: string;
             context?: object;
             album?: Array<string>;
             photo?: string;
             video?: string;
         },
-    ): Promise<boolean> {
+    ): Promise<string | null> {
         try {
-            await this.dryFrontend.sendSystemMessage(tid, messageType, options);
-            return true;
+            return await this.dryFrontend.sendSystemMessage(
+                tid,
+                messageType,
+                options,
+            );
         } catch (e: unknown) {
             if (e instanceof GrammyError) {
                 await this.logger.warn(e.toString());
-                return false;
+                return null;
             } else {
                 throw e;
             }

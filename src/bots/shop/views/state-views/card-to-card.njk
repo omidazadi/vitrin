@@ -1,0 +1,12 @@
+{% if scenario == 'no-card-error' %}
+هنوز شیوه‌ی دریافت کارت به کارت برای فروشگاه فعال نشده.
+{% elif scenario == 'success' %}
+مبلغ سفارش رو به کارت زیر واریز کن. سپس رسید خرید رو (که بالاتر نوشته شده) همراه با فیش واریزی به اکانت پشتیبانی @{{ shop.supportUsername }} بفرست. <b>تا وقتی سفارشت تکمیل نشده از این بخش خارج نشو.</b>
+
+شماره‌ی کارت: {{ shop.cardNumber }}
+به نام {{ shop.cardOwner }}
+{% if shop.beforePurchaseMessage != null %}
+<><>
+{{ shop.beforePurchaseMessage }}
+{% endif %}
+{% endif %}

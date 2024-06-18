@@ -27,7 +27,6 @@ import { ShopCartWorkflowRouter } from './routers/cart-workflow-router';
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
 import { ShopAdminWorkflowCommandHandler } from './handlers/admin-workflow/command';
-import { ShopAdminWorkflowNavigateInHandler } from './handlers/admin-workflow/navigate-in';
 import { ShopAdminWorkflowNavigateOutHandler } from './handlers/admin-workflow/navigate-out';
 import { ShopAdminWorkflowHomeCommandExecuter } from './handlers/admin-workflow/command-executers/home/home';
 import { ShopAdminWorkflowHomeFaqCommandExecuter } from './handlers/admin-workflow/command-executers/home/faq';
@@ -69,6 +68,25 @@ import { ShopInformationWorkflowNavigateOutHandler } from './handlers/informatio
 import { ShopInformationWorkflowRedoHandler } from './handlers/information-workflow/redo';
 import { ShopCartWorkflowNavigateCartHandler } from './handlers/cart-workflow/navigate-cart';
 import { ShopCartWorkflowNavigateOutHandler } from './handlers/cart-workflow/navigate-out';
+import { ShopCommandWorkflowToCartHandler } from './handlers/command-workflow/to-cart';
+import { ShopCartWorkflowCartHyderaterHelper } from './handlers/cart-workflow/helpers/cart-hyderater';
+import { ShopCartWorkflowDeleteMissingHandler } from './handlers/cart-workflow/delete-missing';
+import { ShopCartWorkflowNavigateCheckoutHandler } from './handlers/cart-workflow/navigate-checkout';
+import { ShopCartWorkflowUidGeneratorHelper } from './handlers/cart-workflow/helpers/uid-generator';
+import { ShopCartWorkflowPurchaseCancelerHelper } from './handlers/cart-workflow/helpers/purchase-canceler';
+import { ShopCartWorkflowCancelPurchaseHandler } from './handlers/cart-workflow/cancel-purchase';
+import { ShopHangingPurchaseCollectorCronJob } from './cron-jobs/hanging-purchase-collector';
+import { ShopCommandWorkflowTriggerExecuterHelper } from './handlers/command-workflow/helpers/trigger-executer';
+import { ShopAdminWorkflowShopCommandExecuter } from './handlers/admin-workflow/command-executers/shop/shop';
+import { ShopAdminWorkflowShopAfterPurchaseMessageCommandExecuter } from './handlers/admin-workflow/command-executers/shop/after-purchase-message';
+import { ShopAdminWorkflowShopBeforePurchaseMessageCommandExecuter } from './handlers/admin-workflow/command-executers/shop/before-purchase-message';
+import { ShopAdminWorkflowShopCardInfoCommandExecuter } from './handlers/admin-workflow/command-executers/shop/card-info';
+import { ShopCartWorkflowPurchasePayerHelper } from './handlers/cart-workflow/helpers/purchase-payer';
+import { ShopCartWorkflowPurchaseDelivererHelper } from './handlers/cart-workflow/helpers/purchase-deliverer';
+import { ShopCommandWorkflowToCliHandler } from './handlers/command-workflow/to-cli';
+import { ShopCartWorkflowNavigateCardToCardHandler } from './handlers/cart-workflow/navigate-card-to-card';
+import { ShopComingSoonHandler } from './handlers/common/coming-soon';
+import { ShopAdminWorkflowPurchaseCommandExecuter } from './handlers/admin-workflow/command-executers/purchase';
 
 @Module({})
 export class ShopModule {
@@ -182,6 +200,7 @@ export class ShopModule {
                 TcommandParser,
                 AcommandParser,
 
+                ShopHangingPurchaseCollectorCronJob,
                 ShopRootRouter,
                 ShopAdminWorkflowRouter,
                 ShopCartWorkflowRouter,
@@ -192,7 +211,6 @@ export class ShopModule {
                 ShopHomeWorkflowAboutHandler,
                 ShopHomeWorkflowFaqHandler,
                 ShopAdminWorkflowCommandHandler,
-                ShopAdminWorkflowNavigateInHandler,
                 ShopAdminWorkflowNavigateOutHandler,
                 ShopProductWorkflowAddToCartHandler,
                 ShopProductWorkflowMorePicturesHandler,
@@ -205,9 +223,16 @@ export class ShopModule {
                 ShopProductWorkflowSelectOptionHandler,
                 ShopCommandWorkflowSetReferralHandler,
                 ShopCommandWorkflowStartHandler,
+                ShopCommandWorkflowToCartHandler,
+                ShopCommandWorkflowToCliHandler,
+                ShopCartWorkflowCancelPurchaseHandler,
+                ShopCartWorkflowDeleteMissingHandler,
+                ShopCartWorkflowNavigateCardToCardHandler,
                 ShopCartWorkflowNavigateCartHandler,
+                ShopCartWorkflowNavigateCheckoutHandler,
                 ShopCartWorkflowNavigateOutHandler,
                 ShopCartWorkflowNavigateInHandler,
+                ShopComingSoonHandler,
                 ShopInternalErrorHandler,
                 ShopOnMaintenanceHandler,
                 ShopUnknownErrorHandler,
@@ -225,17 +250,28 @@ export class ShopModule {
                 ShopAdminWorkflowSectionTagCommandExecuter,
                 ShopAdminWorkflowMaintenanceCommandExecuter,
                 ShopAdminWorkflowReferralPartnerCommandExecuter,
+                ShopAdminWorkflowShopAfterPurchaseMessageCommandExecuter,
+                ShopAdminWorkflowShopBeforePurchaseMessageCommandExecuter,
+                ShopAdminWorkflowShopCardInfoCommandExecuter,
+                ShopAdminWorkflowShopCommandExecuter,
+                ShopAdminWorkflowPurchaseCommandExecuter,
                 ShopAdminWorkflowTagCommandExecuter,
                 ShopAdminWorkflowProductCommandExecuter,
                 ShopAdminWorkflowProductVarietyCommandExecuter,
                 ShopAdminWorkflowProductVarietyMediaCommandExecuter,
                 ShopAdminWorkflowProductOptionCommandExecuter,
                 ShopAdminWorkflowProductTagCommandExecuter,
+                ShopCommandWorkflowTriggerExecuterHelper,
                 ShopProductWorkflowProductCameraHelper,
                 ShopProductWorkflowProductUnavailableFallbackHelper,
                 ShopProductWorkflowRendererHelper,
                 ShopProductWorkflowSectionChainBuilderHelper,
                 ShopProductWorkflowSectionTransitionerHelper,
+                ShopCartWorkflowCartHyderaterHelper,
+                ShopCartWorkflowPurchaseCancelerHelper,
+                ShopCartWorkflowPurchaseDelivererHelper,
+                ShopCartWorkflowPurchasePayerHelper,
+                ShopCartWorkflowUidGeneratorHelper,
             ],
         };
     }

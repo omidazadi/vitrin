@@ -16,6 +16,10 @@ import { validate } from 'class-validator';
 import { OptionRepository } from './repositories/option-repository';
 import { OptionVarietyRepository } from './repositories/option-variety-repository';
 import { VarietyMediaRepository } from './repositories/variety-media-repository';
+import { PaymentRepository } from './repositories/payment-repository';
+import { PurchaseItemRepository } from './repositories/purchase-item-repository';
+import { PurchaseRepository } from './repositories/purchase-repository';
+import { ReferralDepositStatementRepository } from './repositories/referral-deposit-statement';
 
 @Module({
     providers: [
@@ -44,7 +48,11 @@ import { VarietyMediaRepository } from './repositories/variety-media-repository'
         CustomerRepository,
         OptionRepository,
         OptionVarietyRepository,
+        PaymentRepository,
         ProductRepository,
+        PurchaseItemRepository,
+        PurchaseRepository,
+        ReferralDepositStatementRepository,
         ReferralPartnerRepository,
         SectionRepository,
         ShopRepository,
@@ -61,7 +69,11 @@ import { VarietyMediaRepository } from './repositories/variety-media-repository'
         CustomerRepository,
         OptionRepository,
         OptionVarietyRepository,
+        PaymentRepository,
         ProductRepository,
+        PurchaseItemRepository,
+        PurchaseRepository,
+        ReferralDepositStatementRepository,
         ReferralPartnerRepository,
         SectionRepository,
         ShopRepository,

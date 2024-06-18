@@ -39,6 +39,12 @@ DO $$
                 about_file_tid VARCHAR(256),
                 faq_description TEXT,
                 faq_file_tid VARCHAR(256),
+                support_username VARCHAR(256),
+                card_number VARCHAR(256),
+                card_owner VARCHAR(256),
+                before_purchase_message TEXT,
+                after_purchase_message TEXT,
+                purchase_channel_tid VARCHAR(256),
                 owner INTEGER NOT NULL,
                 FOREIGN KEY (owner) 
                     REFERENCES visitor (id)
@@ -267,27 +273,26 @@ DO $$
             );
 
             CREATE TABLE IF NOT EXISTS payment (
-                id SERIAL PRIMARY KEY, 
+                uid VARCHAR(64) PRIMARY KEY,
+                type VARCHAR(64) NOT NULL,
                 method VARCHAR(64) NOT NULL,
-                status VARCHAR(256) NOT NULL,
+                status VARCHAR(64) NOT NULL,
                 sum INTEGER NOT NULL,
                 created_at TIMESTAMP NOT NULL
             );
 
-            CREATE TABLE IF NOT EXISTS purchase (
-                id SERIAL PRIMARY KEY, 
-                payment_id INTEGER NOT NULL,
-                customer INTEGER NOT NULL,
-                status VARCHAR(256) NOT NULL,
-                shipping_fee INTEGER NOT NULL,
+            CREATE TABLE IF NOT EXISTS referral_deposit_statement (
+                uid VARCHAR(64) PRIMARY KEY,
+                payment_uid VARCHAR(64) NOT NULL,
+                referral VARCHAR(64),
                 sum INTEGER NOT NULL,
                 created_at TIMESTAMP NOT NULL,
-                shop VARCHAR(64) NOT NULL,
-                FOREIGN KEY (payment_id) 
-                    REFERENCES payment (id)
-                    ON DELETE SET NULL,
-                FOREIGN KEY (customer) 
-                    REFERENCES customer (id)
+                shop VARCHAR(64),
+                FOREIGN KEY (payment_uid) 
+                    REFERENCES payment (uid),
+                FOREIGN KEY (referral, shop) 
+                    REFERENCES referral_partner (name, shop)
+                    ON UPDATE CASCADE
                     ON DELETE SET NULL,
                 FOREIGN KEY (shop) 
                     REFERENCES shop (name)
@@ -295,16 +300,52 @@ DO $$
                     ON DELETE SET NULL
             );
 
+            CREATE TABLE IF NOT EXISTS purchase (
+                uid VARCHAR(64) PRIMARY KEY,
+                payment_uid VARCHAR(64) NOT NULL,
+                customer_receipt_tid VARCHAR(256),
+                shop_receipt_tid VARCHAR(256),
+                customer INTEGER,
+                recipient_first_name VARCHAR(64) NOT NULL,
+                recipient_last_name VARCHAR(64) NOT NULL,
+                recipient_address TEXT NOT NULL,
+                recipient_zip_code VARCHAR(64) NOT NULL,
+                status VARCHAR(64) NOT NULL,
+                tracking_numbers VARCHAR(64)[],
+                referral VARCHAR(64),
+                referral_fee INTEGER NOT NULL,
+                referral_deposit_statement_uid VARCHAR(64),
+                shipping_fee INTEGER NOT NULL,
+                sum INTEGER NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                shop VARCHAR(64),
+                FOREIGN KEY (payment_uid) 
+                    REFERENCES payment (uid),
+                FOREIGN KEY (customer) 
+                    REFERENCES customer (id)
+                    ON DELETE SET NULL,
+                FOREIGN KEY (referral, shop) 
+                    REFERENCES referral_partner (name, shop)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL,
+                FOREIGN KEY (referral_deposit_statement_uid) 
+                    REFERENCES referral_deposit_statement (uid),
+                FOREIGN KEY (shop) 
+                    REFERENCES shop (name)
+                    ON UPDATE CASCADE
+                    ON DELETE SET NULL
+            );
+
             CREATE TABLE IF NOT EXISTS purchase_item  (
-                purchase_id INTEGER NOT NULL,
-                product VARCHAR(64) NOT NULL,
-                variety VARCHAR(64) NOT NULL,
+                purchase_uid VARCHAR(64) NOT NULL,
+                product VARCHAR(64),
+                variety VARCHAR(64),
+                item_full_name VARCHAR(256) NOT NULL,
                 price INTEGER NOT NULL,
                 created_at TIMESTAMP NOT NULL,
-                shop VARCHAR(64) NOT NULL,
-                FOREIGN KEY (purchase_id) 
-                    REFERENCES purchase (id)
-                    ON DELETE CASCADE,
+                shop VARCHAR(64),
+                FOREIGN KEY (purchase_uid) 
+                    REFERENCES purchase (uid),
                 FOREIGN KEY (variety, product, shop) 
                     REFERENCES variety (name, product, shop)
                     ON UPDATE CASCADE
@@ -317,13 +358,6 @@ DO $$
                     REFERENCES shop (name)
                     ON UPDATE CASCADE
                     ON DELETE SET NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS jibit_payment (
-                payment_id INTEGER PRIMARY KEY,
-                FOREIGN KEY (payment_id) 
-                    REFERENCES payment (id)
-                    ON DELETE CASCADE
             );
 
             UPDATE meta_data

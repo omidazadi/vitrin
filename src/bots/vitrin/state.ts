@@ -1,1 +1,1 @@
-export type VitrinState = 'home' | 'admin-cli';
+export type VitrinState = 'home' | 'admin-cli' | 'referral-panel';

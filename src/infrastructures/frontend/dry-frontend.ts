@@ -35,9 +35,46 @@ export class DryFrontend {
         tid: string,
         action: string,
         options?: {
-            forcedType?: 'keyboard' | 'inline' | 'url';
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            replyTo?: string;
             context?: object;
             album?: Array<string>;
+            photo?: string;
+            video?: string;
+        },
+    ): Promise<string | null> {
+        const context = this.buildHydratedContext(options);
+        const text = nunjucks.render(
+            `${this.uiPath}/action-views/${action}.njk`,
+            context,
+        );
+        const replyMarkup = await this.buildButtons(
+            `${this.uiPath}/action-views/${action}`,
+            context,
+            {
+                forcedType: options?.forcedType,
+            },
+        );
+        return await this.sliceAndSend(
+            tid,
+            text,
+            replyMarkup,
+            {
+                album: options?.album,
+                photo: options?.photo,
+                video: options?.video,
+            },
+            { replyTo: options?.replyTo },
+        );
+    }
+
+    public async modifyActionMessage(
+        userTid: string,
+        messageTid: string,
+        action: string,
+        options?: {
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            context?: object;
             photo?: string;
             video?: string;
         },
@@ -54,24 +91,60 @@ export class DryFrontend {
                 forcedType: options?.forcedType,
             },
         );
-        await this.sliceAndSend(tid, text, replyMarkup, {
-            album: options?.album,
-            photo: options?.photo,
-            video: options?.video,
-        });
+
+        if (typeof options?.video !== 'undefined') {
+            await this.grammyBot.api.editMessageMedia(
+                parseInt(userTid),
+                parseInt(messageTid),
+                {
+                    type: 'video',
+                    media: options?.video,
+                    caption: text,
+                    parse_mode: 'HTML',
+                },
+                {
+                    reply_markup: replyMarkup as InlineKeyboardMarkup,
+                },
+            );
+        } else if (typeof options?.photo !== 'undefined') {
+            await this.grammyBot.api.editMessageMedia(
+                parseInt(userTid),
+                parseInt(messageTid),
+                {
+                    type: 'photo',
+                    media: options?.photo,
+                    caption: text,
+                    parse_mode: 'HTML',
+                },
+                {
+                    reply_markup: replyMarkup as InlineKeyboardMarkup,
+                },
+            );
+        } else {
+            await this.grammyBot.api.editMessageText(
+                parseInt(userTid),
+                parseInt(messageTid),
+                text,
+                {
+                    parse_mode: 'HTML',
+                    reply_markup: replyMarkup as InlineKeyboardMarkup,
+                },
+            );
+        }
     }
 
     public async sendSystemMessage(
         tid: string,
         messageType: string,
         options?: {
-            forcedType?: 'keyboard' | 'inline' | 'url';
+            forcedType?: 'keyboard' | 'inline' | 'url' | 'none';
+            replyTo?: string;
             context?: object;
             album?: Array<string>;
             photo?: string;
             video?: string;
         },
-    ): Promise<void> {
+    ): Promise<string | null> {
         const context = this.buildHydratedContext(options);
         const text = nunjucks.render(
             `${this.uiPath}/system-views/${messageType}.njk`,
@@ -84,11 +157,17 @@ export class DryFrontend {
                 forcedType: options?.forcedType,
             },
         );
-        await this.sliceAndSend(tid, text, replyMarkup, {
-            album: options?.album,
-            photo: options?.photo,
-            video: options?.video,
-        });
+        return await this.sliceAndSend(
+            tid,
+            text,
+            replyMarkup,
+            {
+                album: options?.album,
+                photo: options?.photo,
+                video: options?.video,
+            },
+            { replyTo: options?.replyTo },
+        );
     }
 
     private buildHydratedContext(options: any): any {
@@ -105,7 +184,7 @@ export class DryFrontend {
     private async buildButtons(
         prefixPath: string,
         context: object,
-        options?: { forcedType?: 'keyboard' | 'inline' | 'url' },
+        options?: { forcedType?: 'keyboard' | 'inline' | 'url' | 'none' },
     ): Promise<
         | ReplyKeyboardMarkup
         | ReplyKeyboardRemove
@@ -118,6 +197,8 @@ export class DryFrontend {
             return this.buildInlineButtons(prefixPath, context);
         } else if (options?.forcedType === 'url') {
             return this.buildUrlButtons(prefixPath, context);
+        } else if (options?.forcedType === 'none') {
+            return undefined;
         }
 
         let buttonType = 'none';
@@ -223,8 +304,13 @@ export class DryFrontend {
             | ReplyKeyboardRemove
             | InlineKeyboardMarkup
             | undefined,
-        media: { album?: Array<string>; photo?: string; video?: string },
-    ): Promise<void> {
+        media: {
+            album?: Array<string>;
+            photo?: string;
+            video?: string;
+        },
+        options?: { replyTo?: string },
+    ): Promise<string | null> {
         if (typeof media.album !== 'undefined' && media.album.length === 0) {
             media.album = undefined;
         }
@@ -241,6 +327,7 @@ export class DryFrontend {
         }
 
         let isFirst = true;
+        let lastTid: string | null = null;
         while (isFirst || text.length > 0) {
             let sliced = '';
             [sliced, text] = this.sliceText(text, sliceSize);
@@ -272,34 +359,86 @@ export class DryFrontend {
                         await setTimeout(uxConstant.consecutiveMessageDelay);
                     }
 
-                    await this.grammyBot.api.sendMediaGroup(
+                    let result = await this.grammyBot.api.sendMediaGroup(
                         parseInt(tid),
                         convertedAlbum,
+                        {
+                            reply_parameters:
+                                typeof options?.replyTo !== 'undefined' &&
+                                text === ''
+                                    ? {
+                                          allow_sending_without_reply: true,
+                                          message_id: parseInt(options.replyTo),
+                                      }
+                                    : undefined,
+                        },
                     );
+                    lastTid = result[result.length - 1].message_id.toString();
 
                     isFirstAlbum = false;
                 }
             } else if (isFirst && typeof media.photo !== 'undefined') {
-                await this.grammyBot.api.sendPhoto(parseInt(tid), media.photo, {
-                    caption: sliced === '' ? undefined : sliced,
-                    reply_markup: text === '' ? replyMarkup : undefined,
-                    parse_mode: 'HTML',
-                });
+                let result = await this.grammyBot.api.sendPhoto(
+                    parseInt(tid),
+                    media.photo,
+                    {
+                        caption: sliced === '' ? undefined : sliced,
+                        reply_markup: text === '' ? replyMarkup : undefined,
+                        parse_mode: 'HTML',
+                        reply_parameters:
+                            typeof options?.replyTo !== 'undefined' &&
+                            text === ''
+                                ? {
+                                      allow_sending_without_reply: true,
+                                      message_id: parseInt(options.replyTo),
+                                  }
+                                : undefined,
+                    },
+                );
+                lastTid = result.message_id.toString();
             } else if (isFirst && typeof media.video !== 'undefined') {
-                await this.grammyBot.api.sendVideo(parseInt(tid), media.video, {
-                    caption: sliced === '' ? undefined : sliced,
-                    reply_markup: text === '' ? replyMarkup : undefined,
-                    parse_mode: 'HTML',
-                });
+                let result = await this.grammyBot.api.sendVideo(
+                    parseInt(tid),
+                    media.video,
+                    {
+                        caption: sliced === '' ? undefined : sliced,
+                        reply_markup: text === '' ? replyMarkup : undefined,
+                        parse_mode: 'HTML',
+                        reply_parameters:
+                            typeof options?.replyTo !== 'undefined' &&
+                            text === ''
+                                ? {
+                                      allow_sending_without_reply: true,
+                                      message_id: parseInt(options.replyTo),
+                                  }
+                                : undefined,
+                    },
+                );
+                lastTid = result.message_id.toString();
             } else {
-                await this.grammyBot.api.sendMessage(parseInt(tid), sliced, {
-                    reply_markup: text === '' ? replyMarkup : undefined,
-                    parse_mode: 'HTML',
-                });
+                let result = await this.grammyBot.api.sendMessage(
+                    parseInt(tid),
+                    sliced,
+                    {
+                        reply_markup: text === '' ? replyMarkup : undefined,
+                        parse_mode: 'HTML',
+                        reply_parameters:
+                            typeof options?.replyTo !== 'undefined' &&
+                            text === ''
+                                ? {
+                                      allow_sending_without_reply: true,
+                                      message_id: parseInt(options.replyTo),
+                                  }
+                                : undefined,
+                    },
+                );
+                lastTid = result.message_id.toString();
             }
 
             isFirst = false;
         }
+
+        return lastTid;
     }
 
     private sliceText(text: string, sliceSize: number): [string, string] {

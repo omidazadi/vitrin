@@ -55,8 +55,7 @@ export class VitrinGateway implements GatewayInterface {
         this.runningShops = runningShops;
     }
 
-    public async preInitialize(preInitializeData: any): Promise<void> {}
-    public async postInitialize(postInitializeData: any): Promise<void> {
+    public async initialize(data: any): Promise<void> {
         const poolClient = await this.databaseManager.createTransaction();
         const shops = await this.shopRepository.getAllShops(poolClient);
         for (const shop of shops) {
@@ -67,7 +66,7 @@ export class VitrinGateway implements GatewayInterface {
             this.runningShops[shop.name] =
                 await NestFactory.createApplicationContext(shopModule);
             const botRunner = this.runningShops[shop.name].get(BotRunner);
-            await botRunner.run(null, { poolClient: poolClient });
+            await botRunner.run({ poolClient: poolClient });
         }
         await this.databaseManager.commitTransaction(poolClient);
     }

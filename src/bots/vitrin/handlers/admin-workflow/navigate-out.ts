@@ -7,22 +7,26 @@ import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend
 import { VisitorRepository } from 'src/database/repositories/visitor-repository';
 import { VitrinConfig } from '../../configs/vitrin-config';
 import { allowedMedia } from 'src/infrastructures/allowed-media';
+import { ReferralPartnerRepository } from 'src/database/repositories/referral-partner-repository';
 
 @Injectable()
 export class VitrinAdminWorkflowNavigateOutHandler {
     private frontend: HydratedFrontend;
     private visitorRepository: VisitorRepository;
+    private referralPartnerRepository: ReferralPartnerRepository;
     private grammyBot: GrammyBot;
     private vitrinConfig: VitrinConfig;
 
     public constructor(
         frontend: HydratedFrontend,
         visitorRepository: VisitorRepository,
+        referralPartnerRepository: ReferralPartnerRepository,
         grammyBot: GrammyBot,
         vitrinConfig: VitrinConfig,
     ) {
         this.frontend = frontend;
         this.visitorRepository = visitorRepository;
+        this.referralPartnerRepository = referralPartnerRepository;
         this.grammyBot = grammyBot;
         this.vitrinConfig = vitrinConfig;
     }
@@ -40,6 +44,11 @@ export class VitrinAdminWorkflowNavigateOutHandler {
             )) as any
         ).username;
         const visitor = instanceToInstance(requestContext.user);
+        const referrals =
+            await this.referralPartnerRepository.getReferralPartnersByVisitor(
+                visitor.id,
+                requestContext.poolClient,
+            );
         visitor.data = { state: 'home' };
         await this.visitorRepository.updateVisitor(
             visitor,
@@ -48,7 +57,7 @@ export class VitrinAdminWorkflowNavigateOutHandler {
         await this.frontend.sendActionMessage(
             requestContext.user.tid,
             'admin-workflow/navigate-out',
-            { context: { owner: ownerUsername } },
+            { context: { owner: ownerUsername, referrals: referrals } },
         );
     }
 }

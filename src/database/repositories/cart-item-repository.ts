@@ -141,14 +141,22 @@ export class CartItemRepository {
             `
             DELETE
             FROM cart_item
-            WHERE
-                customer = $1
-                    AND
-                product = $2
-                    AND
-                variety = $3
-                    AND
-                shop = $4
+            WHERE ctid IN (
+                SELECT ctid
+                FROM cart_item
+                WHERE
+                    customer = $1
+                        AND
+                    product = $2
+                        AND
+                    variety = $3
+                        AND
+                    shop = $4
+                ORDER BY 
+                    created_at
+                    DESC
+                LIMIT 1
+            )
             `,
             [customer, product, variety, shop],
         );
@@ -172,6 +180,24 @@ export class CartItemRepository {
                 shop = $3
             `,
             [customer, product, shop],
+        );
+    }
+
+    public async deleteCustomerCart(
+        customer: number,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<void> {
+        await poolClient.query(
+            `
+            DELETE
+            FROM cart_item
+            WHERE
+                customer = $1
+                    AND
+                shop = $2
+            `,
+            [customer, shop],
         );
     }
 

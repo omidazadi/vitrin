@@ -1,0 +1,10 @@
+[
+    {% for referral in referrals %}
+    [
+        "{{ referral.shop }}:{{ referral.name }}"
+    ],
+    {% endfor %}
+    [
+        "{{ buttonTexts.state.referral_panel.back }}"
+    ]
+]

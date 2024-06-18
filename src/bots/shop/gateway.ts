@@ -18,6 +18,8 @@ import { VisitorRepository } from 'src/database/repositories/visitor-repository'
 import { ShopCustomer } from './user-builder';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
 import { BotConfig } from 'src/infrastructures/configs/bot-config';
+import { ShopHangingPurchaseCollectorCronJob } from './cron-jobs/hanging-purchase-collector';
+import { CronJob } from 'cron';
 
 export class ShopGateway implements GatewayInterface {
     private shopName: string;
@@ -27,6 +29,7 @@ export class ShopGateway implements GatewayInterface {
     private databaseManager: DatabaseManager;
     private router: ShopRootRouter;
     private logger: Logger;
+    private hangingPurchaseCollectorCronJob: ShopHangingPurchaseCollectorCronJob;
     private internalErrorHandler: ShopInternalErrorHandler;
     private onMaintenanceHandler: ShopOnMaintenanceHandler;
     private unknownErrorHandler: ShopUnknownErrorHandler;
@@ -43,6 +46,7 @@ export class ShopGateway implements GatewayInterface {
         databaseManager: DatabaseManager,
         router: ShopRootRouter,
         logger: Logger,
+        hangingPurchaseCollectorCronJob: ShopHangingPurchaseCollectorCronJob,
         internalErrorHandler: ShopInternalErrorHandler,
         onMaintenanceHandler: ShopOnMaintenanceHandler,
         unknownErrorHandler: ShopUnknownErrorHandler,
@@ -58,6 +62,7 @@ export class ShopGateway implements GatewayInterface {
         this.databaseManager = databaseManager;
         this.router = router;
         this.logger = logger;
+        this.hangingPurchaseCollectorCronJob = hangingPurchaseCollectorCronJob;
         this.internalErrorHandler = internalErrorHandler;
         this.onMaintenanceHandler = onMaintenanceHandler;
         this.unknownErrorHandler = unknownErrorHandler;
@@ -67,14 +72,12 @@ export class ShopGateway implements GatewayInterface {
         this.visitorRepository = visitorRepository;
     }
 
-    public async preInitialize(preInitializeData: any): Promise<void> {}
-
-    public async postInitialize(postInitializeData: any): Promise<void> {
+    public async initialize(data: any): Promise<void> {
         if (!(await this.logger.isJoinedInLogChannel())) {
             throw new Error('Bot is not joined in the log channel.');
         }
 
-        const poolClient = postInitializeData.poolClient as PoolClient;
+        const poolClient = data.poolClient as PoolClient;
         const shop = await this.shopRepository.getShopForce(
             this.shopName,
             poolClient,
@@ -83,6 +86,16 @@ export class ShopGateway implements GatewayInterface {
             shop.tid = this.grammyBot.botInfo.id.toString();
             await this.shopRepository.updateShop(shop, poolClient);
         }
+
+        // new CronJob(
+        //     '*/5 * * * *',
+        //     this.hangingPurchaseCollectorCronJob.collectHangingPurchases.bind(
+        //         this.hangingPurchaseCollectorCronJob,
+        //     ),
+        //     null,
+        //     true,
+        //     'Asia/Tehran',
+        // );
     }
 
     public async recieve(grammyContext: GrammyContext): Promise<void> {

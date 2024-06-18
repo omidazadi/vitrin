@@ -1,0 +1,6 @@
+کالاهای زیر از سبد خریدت دیگه موجودی ندارن. مایلی از سبد خرید حذفشون کنی؟
+
+{% for item in cart %}
+{{ loop.index }}. {{ item[3].fullName }} {% for optionValue in item[2] %}{{ optionValue.option.fullName }} {{ optionValue.value }}{% if not loop.last %} {% endif %}{% endfor %}
+
+{% endfor %}

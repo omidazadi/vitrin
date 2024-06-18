@@ -72,6 +72,23 @@ export class ReferralPartnerRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getReferralPartnersByVisitor(
+        visitor: number,
+        poolClient: PoolClient,
+    ): Promise<Array<ReferralPartner>> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM referral_partner
+            WHERE 
+                visitor = $1
+            `,
+            [visitor],
+        );
+
+        return result.rows.map((row) => this.bake(row));
+    }
+
     public async getAllReferralPartners(
         shop: string,
         poolClient: PoolClient,

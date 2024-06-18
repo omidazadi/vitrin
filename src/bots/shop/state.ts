@@ -6,6 +6,7 @@ export type ShopState =
     | 'product'
     | 'option'
     | 'cart'
-    | 'cart-item'
+    | 'missing-items'
     | 'checkout'
+    | 'card-to-card'
     | 'admin-cli';

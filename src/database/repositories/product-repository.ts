@@ -3,7 +3,6 @@ import { PoolClient } from 'pg';
 import { Product } from '../models/product';
 import { Tag } from '../models/tag';
 import { Section } from '../models/section';
-import { Variety } from '../models/variety';
 
 @Injectable()
 export class ProductRepository {

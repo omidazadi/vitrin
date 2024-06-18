@@ -1,0 +1,21 @@
+<b>رسید فروشنده</b>
+
+شماره‌ی سفارش: {{ purchase.uid }}
+وضعیت سفارش: {% if purchase.status == 'pending' %}در انتظار پرداخت ⏳{% elif purchase.status == 'canceled' %}لغو شده ❌{% elif purchase.status == 'paid' %}پرداخت شده ✅{% elif purchase.status == 'delivered' %}در حال ارسال 🚚{% endif %}
+
+تاریخ: {{ dateString }}
+
+نام: {{ purchase.recipientFirstName }}
+نام خانوادگی: {{ purchase.recipientLastName }}
+نشانی: {{ purchase.recipientAddress }}
+کد پستی: {{ purchase.recipientZipCode }}
+
+{% for item in purchaseItems %}
+{{ loop.index }}. {{ item.itemFullName }}: بها {{ item.price }} تومان
+{% endfor %}
+
+همکار ریفرال: {{ purchase.referral }}
+کارمزد ریفرال: {{ purchase.referralFee }} تومان
+
+هزینه‌ی حمل‌ونقل (پست): {{ purchase.shippingFee }} تومان
+مجموع بها: {{ purchase.sum }} تومان

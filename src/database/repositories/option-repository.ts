@@ -79,6 +79,9 @@ export class OptionRepository {
                 product = $2
                     AND
                 shop = $3
+            ORDER BY
+                name
+                ASC
             `,
             [name, product, shop],
         );

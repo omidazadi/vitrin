@@ -90,6 +90,12 @@ export class VitrinAdminWorkflowShopCommandExecuter {
             null,
             null,
             null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
             visitor.id,
             requestContext.poolClient,
         );
@@ -102,7 +108,7 @@ export class VitrinAdminWorkflowShopCommandExecuter {
             await NestFactory.createApplicationContext(shopModule);
         const botRunner = this.runningShops[shop.name].get(BotRunner);
         try {
-            await botRunner.run(null, {
+            await botRunner.run({
                 poolClient: requestContext.poolClient,
             });
         } catch (e: unknown) {

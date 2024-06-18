@@ -2,32 +2,32 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { ShopCommandWorkflowStartHandler } from '../handlers/command-workflow/start';
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
-import { ShopAdminWorkflowNavigateInHandler } from '../handlers/admin-workflow/navigate-in';
+import { ShopCommandWorkflowToCliHandler } from '../handlers/command-workflow/to-cli';
 import { ShopCustomer } from '../user-builder';
 import { ShopCommandWorkflowSetReferralHandler } from '../handlers/command-workflow/set-referral';
-import { ShopCartWorkflowNavigateInHandler } from '../handlers/cart-workflow/navigate-in';
+import { ShopCommandWorkflowToCartHandler } from '../handlers/command-workflow/to-cart';
 
 @Injectable()
 export class ShopCommandRouter {
     private startHandler: ShopCommandWorkflowStartHandler;
     private setReferralHandler: ShopCommandWorkflowSetReferralHandler;
-    private cartWorkflowNavigateInHandler: ShopCartWorkflowNavigateInHandler;
-    private adminWorkflowNavigateInHandler: ShopAdminWorkflowNavigateInHandler;
+    private toCartHandler: ShopCommandWorkflowToCartHandler;
+    private toCliHandler: ShopCommandWorkflowToCliHandler;
     private tcommandParser: TcommandParser;
     private buttonTexts: any;
 
     public constructor(
         startHandler: ShopCommandWorkflowStartHandler,
         setReferralHandler: ShopCommandWorkflowSetReferralHandler,
-        cartWorkflowNavigateInHandler: ShopCartWorkflowNavigateInHandler,
-        adminWorkflowNavigateInHandler: ShopAdminWorkflowNavigateInHandler,
+        toCartHandler: ShopCommandWorkflowToCartHandler,
+        toCliHandler: ShopCommandWorkflowToCliHandler,
         tcommandParser: TcommandParser,
         @Inject('BUTTON_TEXTS') buttonTexts: any,
     ) {
         this.startHandler = startHandler;
         this.setReferralHandler = setReferralHandler;
-        this.cartWorkflowNavigateInHandler = cartWorkflowNavigateInHandler;
-        this.adminWorkflowNavigateInHandler = adminWorkflowNavigateInHandler;
+        this.toCartHandler = toCartHandler;
+        this.toCliHandler = toCliHandler;
         this.tcommandParser = tcommandParser;
         this.buttonTexts = buttonTexts;
     }
@@ -50,7 +50,7 @@ export class ShopCommandRouter {
                 );
                 return true;
             } else if (tcommandArgs.opcode === 1) {
-                await this.cartWorkflowNavigateInHandler.handle(requestContext);
+                await this.toCartHandler.handle(requestContext, tcommandArgs);
                 return true;
             } else {
                 return false;
@@ -59,7 +59,7 @@ export class ShopCommandRouter {
             requestContext.telegramContext.text ===
             this.buttonTexts.command.admin_cli
         ) {
-            await this.adminWorkflowNavigateInHandler.handle(requestContext);
+            await this.toCliHandler.handle(requestContext);
             return true;
         } else {
             return false;

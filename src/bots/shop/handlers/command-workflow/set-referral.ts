@@ -10,6 +10,7 @@ import { CustomerRepository } from 'src/database/repositories/customer-repositor
 import { ReferralPartnerRepository } from 'src/database/repositories/referral-partner-repository';
 import { ShopProductWorkflowSectionTransitionerHelper } from '../product-workflow/helpers/section-transitioner';
 import { ShopProductWorkflowRendererHelper } from '../product-workflow/helpers/renderer';
+import { ShopCommandWorkflowTriggerExecuterHelper } from './helpers/trigger-executer';
 
 @Injectable()
 export class ShopCommandWorkflowSetReferralHandler {
@@ -19,6 +20,7 @@ export class ShopCommandWorkflowSetReferralHandler {
     private referralPartnerRepository: ReferralPartnerRepository;
     private sectionTransitionerHelper: ShopProductWorkflowSectionTransitionerHelper;
     private rendererHelper: ShopProductWorkflowRendererHelper;
+    private triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper;
 
     public constructor(
         frontend: HydratedFrontend,
@@ -27,6 +29,7 @@ export class ShopCommandWorkflowSetReferralHandler {
         referralPartnerRepository: ReferralPartnerRepository,
         sectionTransitionerHelper: ShopProductWorkflowSectionTransitionerHelper,
         rendererHelper: ShopProductWorkflowRendererHelper,
+        triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper,
     ) {
         this.frontend = frontend;
         this.sectionRepository = sectionRepository;
@@ -34,6 +37,7 @@ export class ShopCommandWorkflowSetReferralHandler {
         this.referralPartnerRepository = referralPartnerRepository;
         this.sectionTransitionerHelper = sectionTransitionerHelper;
         this.rendererHelper = rendererHelper;
+        this.triggerExecuterHelper = triggerExecuterHelper;
     }
 
     @allowedMedia({
@@ -44,6 +48,8 @@ export class ShopCommandWorkflowSetReferralHandler {
         requestContext: RequestContext<ShopCustomer>,
         tcommandArgs: TcommandParser.TcommandArgs,
     ): Promise<void> {
+        await this.triggerExecuterHelper.executeTrigger(requestContext);
+
         const shopCustomer = instanceToInstance(requestContext.user);
         if (typeof tcommandArgs?.data.referral !== 'undefined') {
             if (tcommandArgs.data.referral === 'null') {

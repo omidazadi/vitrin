@@ -16,6 +16,12 @@ export class ShopRepository {
         aboutFileTid: string | null,
         faqDescription: string | null,
         faqFileTid: string | null,
+        supportUsername: string | null,
+        cardNumber: string | null,
+        cardOwner: string | null,
+        beforePurchaseMessage: string | null,
+        afterPurchaseMessage: string | null,
+        purchaseChannelTid: string | null,
         owner: number,
         poolClient: PoolClient,
     ): Promise<Shop> {
@@ -34,10 +40,16 @@ export class ShopRepository {
                 about_file_tid,
                 faq_description,
                 faq_file_tid,
+                support_username,
+                card_number,
+                card_owner,
+                before_purchase_message,
+                after_purchase_message,
+                purchase_channel_tid,
                 owner
             )
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
             RETURNING *
             `,
             [
@@ -52,6 +64,12 @@ export class ShopRepository {
                 aboutFileTid,
                 faqDescription,
                 faqFileTid,
+                supportUsername,
+                cardNumber,
+                cardOwner,
+                beforePurchaseMessage,
+                afterPurchaseMessage,
+                purchaseChannelTid,
                 owner,
             ],
         );
@@ -74,7 +92,13 @@ export class ShopRepository {
                 about_file_tid = $9,
                 faq_description = $10,
                 faq_file_tid = $11,
-                owner = $12
+                support_username = $12,
+                card_number = $13,
+                card_owner = $14,
+                before_purchase_message = $15,
+                after_purchase_message = $16,
+                purchase_channel_tid = $17,
+                owner = $18
             WHERE name = $1
             `,
             [
@@ -89,6 +113,12 @@ export class ShopRepository {
                 shop.aboutFileTid,
                 shop.faqDescription,
                 shop.faqFileTid,
+                shop.supportUsername,
+                shop.cardNumber,
+                shop.cardOwner,
+                shop.beforePurchaseMessage,
+                shop.afterPurchaseMessage,
+                shop.purchaseChannelTid,
                 shop.owner,
             ],
         );
@@ -213,6 +243,12 @@ export class ShopRepository {
             row.about_file_tid,
             row.faq_description,
             row.faq_file_tid,
+            row.support_username,
+            row.card_number,
+            row.card_owner,
+            row.before_purchase_message,
+            row.after_purchase_message,
+            row.purchase_channel_tid,
             row.owner,
         );
     }

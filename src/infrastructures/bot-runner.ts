@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Bot as GrammyBot } from 'grammy';
 import { GatewayInterface } from './interfaces/gateway';
 import { Logger } from './logger';
-import { setTimeout } from 'timers/promises';
 
 @Injectable()
 export class BotRunner {
@@ -20,17 +19,11 @@ export class BotRunner {
         this.logger = logger;
     }
 
-    public async run(
-        preInitializeData: any = undefined,
-        postInitializeData: any = undefined,
-    ): Promise<void> {
-        await this.gateway.preInitialize(preInitializeData);
+    public async run(initializationData: any = undefined): Promise<void> {
         this.grammyBot.on('message', this.gateway.recieve.bind(this.gateway));
         this.grammyBot.start();
-        while (!this.grammyBot.isInited()) {
-            await setTimeout(500);
-        }
-        await this.gateway.postInitialize(postInitializeData);
+        await this.grammyBot.init();
+        await this.gateway.initialize(initializationData);
         await this.logger.log('Bot is live.');
     }
 }

@@ -8,24 +8,45 @@ import { allowedMedia } from 'src/infrastructures/allowed-media';
 import { RequestContext } from 'src/infrastructures/context/request-context';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
 import { HydratedFrontend } from 'src/infrastructures/frontend/hydrated-frontend';
+import { PurchaseRepository } from 'src/database/repositories/purchase-repository';
+import { CustomerRepository } from 'src/database/repositories/customer-repository';
+import { ReferralDepositStatementRepository } from 'src/database/repositories/referral-deposit-statement';
+import { ShopCartWorkflowUidGeneratorHelper } from '../../cart-workflow/helpers/uid-generator';
+import { PaymentRepository } from 'src/database/repositories/payment-repository';
 
 @Injectable()
 export class ShopAdminWorkflowReferralPartnerCommandExecuter {
     private grammyBot: GrammyBot;
     private frontend: HydratedFrontend;
+    private customerRepository: CustomerRepository;
+    private paymentRepository: PaymentRepository;
+    private purchaseRepository: PurchaseRepository;
     private referralPartnerRepository: ReferralPartnerRepository;
+    private referralDepositStatementRepository: ReferralDepositStatementRepository;
     private visitorRepository: VisitorRepository;
+    private cartWorkflowUidGeneratorHelper: ShopCartWorkflowUidGeneratorHelper;
 
     public constructor(
         grammyBot: GrammyBot,
         frontend: HydratedFrontend,
+        customerRepository: CustomerRepository,
+        paymentRepository: PaymentRepository,
+        purchaseRepository: PurchaseRepository,
         referralPartnerRepository: ReferralPartnerRepository,
+        referralDepositStatementRepository: ReferralDepositStatementRepository,
         visitorRepository: VisitorRepository,
+        cartWorkflowUidGeneratorHelper: ShopCartWorkflowUidGeneratorHelper,
     ) {
         this.grammyBot = grammyBot;
         this.frontend = frontend;
+        this.customerRepository = customerRepository;
+        this.paymentRepository = paymentRepository;
+        this.purchaseRepository = purchaseRepository;
         this.referralPartnerRepository = referralPartnerRepository;
+        this.referralDepositStatementRepository =
+            referralDepositStatementRepository;
         this.visitorRepository = visitorRepository;
+        this.cartWorkflowUidGeneratorHelper = cartWorkflowUidGeneratorHelper;
     }
 
     public async handle(
@@ -63,6 +84,16 @@ export class ShopAdminWorkflowReferralPartnerCommandExecuter {
             );
         } else if (tokens[0] === 'link') {
             await this.getReferralPartnerLink(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
+        } else if (tokens[0] === 'statistics') {
+            await this.showReferralPartnerStatistics(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
+        } else if (tokens[0] === 'pay') {
+            await this.payReferralPartner(
                 requestContext,
                 tokens.slice(1, tokens.length),
             );
@@ -291,6 +322,156 @@ export class ShopAdminWorkflowReferralPartnerCommandExecuter {
                 context: {
                     scenario: 'plain',
                     message: `https://telegram.me/${this.grammyBot.botInfo.username}?start=0-referral=${referralPartner.name}-landing=root`,
+                },
+            },
+        );
+    }
+
+    @allowedMedia({
+        photo: 'prohibited',
+        video: 'prohibited',
+    })
+    public async showReferralPartnerStatistics(
+        requestContext: RequestContext<ShopCustomer>,
+        tokens: Array<string>,
+    ) {
+        if (tokens.length !== 1) {
+            await this.error(requestContext);
+            return;
+        }
+
+        const referralPartner =
+            await this.referralPartnerRepository.getReferralPartner(
+                tokens[0],
+                requestContext.user.shop.name,
+                requestContext.poolClient,
+            );
+        if (referralPartner === null) {
+            await this.error(requestContext);
+            return;
+        }
+
+        const totalCustomers =
+            await this.customerRepository.getNumberOfReferralCustomers(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+        const totalPurchases =
+            await this.purchaseRepository.getTotalReferralPurchaseCount(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+        const totalFee =
+            await this.purchaseRepository.getTotalReferralPurchaseSum(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+        const currentPurchases =
+            await this.purchaseRepository.getCurrentReferralPurchaseCount(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+        const currentFee =
+            await this.purchaseRepository.getCurrentReferralPurchaseSum(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+
+        await this.frontend.sendActionMessage(
+            requestContext.user.customer.tid,
+            'helpers/referral-partner-statistics',
+            {
+                context: {
+                    referral: referralPartner,
+                    totalCustomers: totalCustomers,
+                    totalPurchases: totalPurchases,
+                    totalFee: totalFee,
+                    currentPurchases: currentPurchases,
+                    currentFee: currentFee,
+                },
+            },
+        );
+    }
+
+    @allowedMedia({
+        photo: 'prohibited',
+        video: 'prohibited',
+    })
+    public async payReferralPartner(
+        requestContext: RequestContext<ShopCustomer>,
+        tokens: Array<string>,
+    ) {
+        if (tokens.length !== 1) {
+            await this.error(requestContext);
+            return;
+        }
+
+        const referralPartner =
+            await this.referralPartnerRepository.getReferralPartner(
+                tokens[0],
+                requestContext.user.shop.name,
+                requestContext.poolClient,
+            );
+        if (referralPartner === null) {
+            await this.error(requestContext);
+            return;
+        }
+
+        const currentPurchases =
+            await this.purchaseRepository.getCurrentDeliveredReferralPurchases(
+                referralPartner.name,
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+
+        let sum = 0;
+        for (const purchase of currentPurchases) {
+            sum += purchase.referralFee;
+        }
+
+        const payment = await this.paymentRepository.createPayment(
+            'PA' + this.cartWorkflowUidGeneratorHelper.generateUid(),
+            'to-referral',
+            'manual',
+            'accepted',
+            sum,
+            new Date(),
+            requestContext.poolClient,
+        );
+        const referralDepositStatement =
+            await this.referralDepositStatementRepository.createReferralDepositStatement(
+                'RDS-' + this.cartWorkflowUidGeneratorHelper.generateUid(),
+                payment.uid,
+                referralPartner.name,
+                sum,
+                new Date(),
+                referralPartner.shop,
+                requestContext.poolClient,
+            );
+
+        for (const purchase of currentPurchases) {
+            purchase.referralDepositStatementUid = referralDepositStatement.uid;
+            await this.purchaseRepository.updatePurchase(
+                purchase,
+                requestContext.poolClient,
+            );
+        }
+
+        await this.frontend.sendActionMessage(
+            requestContext.user.customer.tid,
+            'helpers/referral-deposit-statement',
+            {
+                context: {
+                    referral: referralPartner,
+                    depositStatement: referralDepositStatement,
+                    currentPurchases: currentPurchases.length,
+                    dateString:
+                        referralDepositStatement.createdAt.toUTCString(),
                 },
             },
         );

@@ -4,8 +4,13 @@
     },
 
     "state": {
-        "home": {},
+        "home": {
+            "referral_panel": "پنل ریفرال 📢"
+        },
         "admin_cli": {
+            "back": "برگشت 🔙"
+        },
+        "referral_panel": {
             "back": "برگشت 🔙"
         }
     }

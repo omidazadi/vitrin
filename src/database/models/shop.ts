@@ -10,6 +10,12 @@ export class Shop {
     public aboutFileTid: string | null;
     public faqDescription: string | null;
     public faqFileTid: string | null;
+    public supportUsername: string | null;
+    public cardNumber: string | null;
+    public cardOwner: string | null;
+    public beforePurchaseMessage: string | null;
+    public afterPurchaseMessage: string | null;
+    public purchaseChannelTid: string | null;
     public owner: number;
 
     constructor(
@@ -24,6 +30,12 @@ export class Shop {
         aboutFileTid: string | null,
         faqDescription: string | null,
         faqFileTid: string | null,
+        supportUsername: string | null,
+        cardNumber: string | null,
+        cardOwner: string | null,
+        beforePurchaseMessage: string | null,
+        afterPurchaseMessage: string | null,
+        purchaseChannelTid: string | null,
         owner: number,
     ) {
         this.name = name;
@@ -37,6 +49,12 @@ export class Shop {
         this.aboutFileTid = aboutFileTid;
         this.faqDescription = faqDescription;
         this.faqFileTid = faqFileTid;
+        this.supportUsername = supportUsername;
+        this.cardNumber = cardNumber;
+        this.cardOwner = cardOwner;
+        this.beforePurchaseMessage = beforePurchaseMessage;
+        this.afterPurchaseMessage = afterPurchaseMessage;
+        this.purchaseChannelTid = purchaseChannelTid;
         this.owner = owner;
     }
 }

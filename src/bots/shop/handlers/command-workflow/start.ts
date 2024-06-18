@@ -6,18 +6,22 @@ import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { ShopCustomer } from '../../user-builder';
 import { CustomerRepository } from 'src/database/repositories/customer-repository';
 import { instanceToInstance } from 'class-transformer';
+import { ShopCommandWorkflowTriggerExecuterHelper } from './helpers/trigger-executer';
 
 @Injectable()
 export class ShopCommandWorkflowStartHandler {
     private frontend: HydratedFrontend;
     private customerRepository: CustomerRepository;
+    private triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper;
 
     public constructor(
         frontend: HydratedFrontend,
         customerRepository: CustomerRepository,
+        triggerExecuterHelper: ShopCommandWorkflowTriggerExecuterHelper,
     ) {
         this.frontend = frontend;
         this.customerRepository = customerRepository;
+        this.triggerExecuterHelper = triggerExecuterHelper;
     }
 
     @allowedMedia({
@@ -28,6 +32,8 @@ export class ShopCommandWorkflowStartHandler {
         requestContext: RequestContext<ShopCustomer>,
         tcommandArgs: TcommandParser.TcommandArgs,
     ): Promise<void> {
+        await this.triggerExecuterHelper.executeTrigger(requestContext);
+
         const customer = instanceToInstance(requestContext.user.customer);
         customer.data = { state: 'home' };
         await this.customerRepository.updateCustomer(

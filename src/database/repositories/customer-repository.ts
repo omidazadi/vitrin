@@ -29,6 +29,53 @@ export class CustomerRepository {
         return this.bake(result.rows[0]);
     }
 
+    public async getCustomer(
+        id: number,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<Customer | null> {
+        const result = await poolClient.query(
+            `
+            SELECT *
+            FROM customer
+            WHERE 
+                id = $1
+                    AND
+                shop = $2
+            `,
+            [id, shop],
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        return this.bake(result.rows[0]);
+    }
+
+    public async getNumberOfReferralCustomers(
+        referral: string,
+        shop: string,
+        poolClient: PoolClient,
+    ): Promise<number> {
+        const result = await poolClient.query(
+            `
+            SELECT COUNT(*) as cnt
+            FROM customer
+            WHERE 
+                referral = $1
+                    AND
+                shop = $2
+            GROUP BY
+                referral,
+                shop
+            `,
+            [referral, shop],
+        );
+
+        return result.rows[0].cnt;
+    }
+
     public async createCustomer(
         tid: string,
         data: Customer.Data,

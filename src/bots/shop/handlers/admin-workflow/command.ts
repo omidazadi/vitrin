@@ -10,6 +10,8 @@ import { ShopCustomer } from '../../user-builder';
 import { ShopAdminWorkflowProductCommandExecuter } from './command-executers/product/product';
 import { ExpectedError } from 'src/infrastructures/errors/expected-error';
 import { ShopAdminWorkflowReferralPartnerCommandExecuter } from './command-executers/referral-partner';
+import { ShopAdminWorkflowShopCommandExecuter } from './command-executers/shop/shop';
+import { ShopAdminWorkflowPurchaseCommandExecuter } from './command-executers/purchase';
 
 @Injectable()
 export class ShopAdminWorkflowCommandHandler {
@@ -17,6 +19,8 @@ export class ShopAdminWorkflowCommandHandler {
     private homeCommandExecuter: ShopAdminWorkflowHomeCommandExecuter;
     private maintenanceCommandExecuter: ShopAdminWorkflowMaintenanceCommandExecuter;
     private referralPartnerCommandExecuter: ShopAdminWorkflowReferralPartnerCommandExecuter;
+    private shopCommandExecuter: ShopAdminWorkflowShopCommandExecuter;
+    private purchaseCommandExecuter: ShopAdminWorkflowPurchaseCommandExecuter;
     private sectionCommandExecuter: ShopAdminWorkflowSectionCommandExecuter;
     private tagCommandExecuter: ShopAdminWorkflowTagCommandExecuter;
     private productCommandExecuter: ShopAdminWorkflowProductCommandExecuter;
@@ -27,6 +31,8 @@ export class ShopAdminWorkflowCommandHandler {
         homeCommandExecuter: ShopAdminWorkflowHomeCommandExecuter,
         maintenanceCommandExecuter: ShopAdminWorkflowMaintenanceCommandExecuter,
         referralPartnerCommandExecuter: ShopAdminWorkflowReferralPartnerCommandExecuter,
+        shopCommandExecuter: ShopAdminWorkflowShopCommandExecuter,
+        purchaseCommandExecuter: ShopAdminWorkflowPurchaseCommandExecuter,
         sectionCommandExecuter: ShopAdminWorkflowSectionCommandExecuter,
         tagCommandExecuter: ShopAdminWorkflowTagCommandExecuter,
         productCommandExecuter: ShopAdminWorkflowProductCommandExecuter,
@@ -36,6 +42,8 @@ export class ShopAdminWorkflowCommandHandler {
         this.homeCommandExecuter = homeCommandExecuter;
         this.maintenanceCommandExecuter = maintenanceCommandExecuter;
         this.referralPartnerCommandExecuter = referralPartnerCommandExecuter;
+        this.shopCommandExecuter = shopCommandExecuter;
+        this.purchaseCommandExecuter = purchaseCommandExecuter;
         this.sectionCommandExecuter = sectionCommandExecuter;
         this.tagCommandExecuter = tagCommandExecuter;
         this.productCommandExecuter = productCommandExecuter;
@@ -62,6 +70,16 @@ export class ShopAdminWorkflowCommandHandler {
             );
         } else if (tokens[0] === 'referral-partner') {
             await this.referralPartnerCommandExecuter.handle(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
+        } else if (tokens[0] === 'shop') {
+            await this.shopCommandExecuter.handle(
+                requestContext,
+                tokens.slice(1, tokens.length),
+            );
+        } else if (tokens[0] === 'purchase') {
+            await this.purchaseCommandExecuter.handle(
                 requestContext,
                 tokens.slice(1, tokens.length),
             );

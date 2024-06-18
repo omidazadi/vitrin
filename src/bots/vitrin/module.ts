@@ -27,6 +27,11 @@ import { VitrinAdminWorkflowShopCommandExecuter } from './handlers/admin-workflo
 import { TcommandParser } from 'src/infrastructures/parsers/tcommand-parser';
 import { AcommandParser } from 'src/infrastructures/parsers/acommand-parser';
 import { BotConfig } from 'src/infrastructures/configs/bot-config';
+import { VitrinReferralPanelWorkflowRouter } from './routers/referral-panel-workflow-router';
+import { VitrinHomeWorkflowRouter } from './routers/home-workflow-router';
+import { VitrinReferralPanelWorkflowNavigateInHandler } from './handlers/referral-panel-workflow/navigate-in';
+import { VitrinReferralPanelWorkflowNavigateOutHandler } from './handlers/referral-panel-workflow/navigate-out';
+import { VitrinReferralPanelWorkflowShowStatisticsHandler } from './handlers/referral-panel-workflow/show-statistics';
 
 @Module({
     imports: [DatabaseModule],
@@ -139,10 +144,15 @@ import { BotConfig } from 'src/infrastructures/configs/bot-config';
         VitrinRootRouter,
         VitrinAdminWorkflowRouter,
         VitrinCommandRouter,
+        VitrinHomeWorkflowRouter,
+        VitrinReferralPanelWorkflowRouter,
         VitrinAdminWorkflowCommandHandler,
         VitrinAdminWorkflowNavigateInHandler,
         VitrinAdminWorkflowNavigateOutHandler,
         VitrinHomeWorkflowJumpToHomeHandler,
+        VitrinReferralPanelWorkflowNavigateInHandler,
+        VitrinReferralPanelWorkflowNavigateOutHandler,
+        VitrinReferralPanelWorkflowShowStatisticsHandler,
         VitrinInternalErrorHandler,
         VitrinUnknownErrorHandler,
         VitrinUnsupportedMediaErrorHandler,

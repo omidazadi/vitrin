@@ -1,0 +1,12 @@
+سفارشت رو به پست تحویل دادیم، و باید طی سه روز کاری به دستت برسه.
+
+{% if purchase.trackingNumbers == null or purchase.trackingNumbers.length === 0 %}
+کد رهگیری در دسترس نیست.
+{% elif purchase.trackingNumbers.length === 1 %}
+کد رهگیری: {{ purchase.trackingNumbers[0] }}
+{% else %}
+کدهای رهگیری: 
+{% for trackingNumber in purchase.trackingNumbers %}
+{{ trackingNumber }}
+{% endfor %}
+{% endif %}
