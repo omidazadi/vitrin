@@ -10,6 +10,12 @@
 
 مقدار حال حاضر <b>{{ customer.lastName }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
 {% endif %}
+{% elif entry == "phoneNumber" %}
+شماره‌ی تلفن همراهت رو وارد کن (شروع با ۰۹).
+{% if customer.phoneNumber != null %}
+
+مقدار حال حاضر <b>{{ customer.phoneNumber }}</b> است. اگه نمی‌خوای تغییرش بدی، روی دکمه‌ی «{{ buttonTexts.state.information_questionnaire.do_not_change }}» بزن.
+{% endif %}
 {% elif entry == "address" %}
 نشانی‌ات رو وارد کن (شامل استان و شهر و پلاک و شماره‌ی واحد).
 {% if customer.address != null %}

@@ -162,6 +162,7 @@ export class ShopCartWorkflowNavigateCheckoutHandler {
             customer.id,
             customer.firstName!,
             customer.lastName!,
+            customer.phoneNumber!,
             customer.address!,
             customer.zipCode!,
             'pending',

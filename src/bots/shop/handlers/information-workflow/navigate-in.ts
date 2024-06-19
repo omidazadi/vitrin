@@ -30,6 +30,7 @@ export class ShopInformationWorkflowNavigateInHandler {
         if (
             customer.firstName !== null &&
             customer.lastName !== null &&
+            customer.phoneNumber !== null &&
             customer.address !== null &&
             customer.zipCode !== null
         ) {

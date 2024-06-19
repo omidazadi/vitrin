@@ -6,6 +6,7 @@ export class Customer {
     public data: Customer.Data;
     public firstName: string | null;
     public lastName: string | null;
+    public phoneNumber: string | null;
     public address: string | null;
     public zipCode: string | null;
     public referral: string | null;
@@ -18,6 +19,7 @@ export class Customer {
         data: Customer.Data,
         firstName: string | null,
         lastName: string | null,
+        phoneNumber: string | null,
         address: string | null,
         zipCode: string | null,
         referral: string | null,
@@ -29,6 +31,7 @@ export class Customer {
         this.data = data;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
         this.address = address;
         this.zipCode = zipCode;
         this.referral = referral;

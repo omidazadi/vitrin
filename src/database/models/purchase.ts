@@ -6,6 +6,7 @@ export class Purchase {
     public customer: number | null;
     public recipientFirstName: string;
     public recipientLastName: string;
+    public recipientPhoneNumber: string;
     public recipientAddress: string;
     public recipientZipCode: string;
     public status: 'pending' | 'canceled' | 'paid' | 'delivered';
@@ -26,6 +27,7 @@ export class Purchase {
         customer: number | null,
         recipientFirstName: string,
         recipientLastName: string,
+        recipientPhoneNumber: string,
         recipientAddress: string,
         recipientZipCode: string,
         status: 'pending' | 'canceled' | 'paid' | 'delivered',
@@ -45,6 +47,7 @@ export class Purchase {
         this.customer = customer;
         this.recipientFirstName = recipientFirstName;
         this.recipientLastName = recipientLastName;
+        this.recipientPhoneNumber = recipientPhoneNumber;
         this.recipientAddress = recipientAddress;
         this.recipientZipCode = recipientZipCode;
         this.status = status;

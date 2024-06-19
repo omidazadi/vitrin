@@ -54,6 +54,7 @@ export class ShopUserBuilder implements UserBuilderInterface<ShopCustomer> {
                     null,
                     null,
                     null,
+                    null,
                     shop.maintenanceVersion,
                     shop.name,
                     poolClient,

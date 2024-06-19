@@ -51,7 +51,7 @@ export class ShopInformationWorkflowFillEntryHandler {
                 customer.data.firstName = customer.firstName;
             }
         } else if (customer.data.entry === 'lastName') {
-            customer.data.entry = 'address';
+            customer.data.entry = 'phoneNumber';
             if (
                 customer.lastName === null ||
                 requestContext.telegramContext.text !==
@@ -61,6 +61,18 @@ export class ShopInformationWorkflowFillEntryHandler {
                 customer.data.lastName = requestContext.telegramContext.text;
             } else {
                 customer.data.lastName = customer.lastName;
+            }
+        } else if (customer.data.entry === 'phoneNumber') {
+            customer.data.entry = 'address';
+            if (
+                customer.phoneNumber === null ||
+                requestContext.telegramContext.text !==
+                    this.buttonTexts.state.information_questionnaire
+                        .do_not_change
+            ) {
+                customer.data.phoneNumber = requestContext.telegramContext.text;
+            } else {
+                customer.data.phoneNumber = customer.phoneNumber;
             }
         } else if (customer.data.entry === 'address') {
             customer.data.entry = 'zipCode';
@@ -88,12 +100,14 @@ export class ShopInformationWorkflowFillEntryHandler {
 
             customer.firstName = customer.data.firstName;
             customer.lastName = customer.data.lastName;
+            customer.phoneNumber = customer.data.phoneNumber;
             customer.address = customer.data.address;
             customer.zipCode = customer.data.zipCode;
             customer.data.state = 'information-document';
             delete customer.data.entry;
             delete customer.data.firstName;
             delete customer.data.lastName;
+            delete customer.data.phoneNumber;
             delete customer.data.address;
             delete customer.data.zipCode;
         }

@@ -17,6 +17,7 @@ DO $$
         WHERE meta_key = 'version'
     );
     DECLARE v0_1_0 VARCHAR(20) := '000.001.000';
+    DECLARE v0_1_1 VARCHAR(20) := '000.001.001';
 
     BEGIN
         -- v0.1.0
@@ -362,6 +363,19 @@ DO $$
 
             UPDATE meta_data
             SET meta_value = v0_1_0
+            WHERE meta_key = 'version';
+        END IF;
+
+        -- v0.1.1
+        IF version < v0_1_1 THEN
+            ALTER TABLE customer
+            ADD COLUMN phone_number VARCHAR(64);
+
+            ALTER TABLE purchase
+            ADD COLUMN recipient_phone_number VARCHAR(64) NOT NULL DEFAULT '00000000000';
+
+            UPDATE meta_data
+            SET meta_value = v0_1_1
             WHERE meta_key = 'version';
         END IF;
     END

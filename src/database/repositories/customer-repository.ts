@@ -81,6 +81,7 @@ export class CustomerRepository {
         data: Customer.Data,
         firstName: string | null,
         lastName: string | null,
+        phoneNumber: string | null,
         address: string | null,
         zipCode: string | null,
         referral: string | null,
@@ -96,6 +97,7 @@ export class CustomerRepository {
                 data, 
                 first_name, 
                 last_name, 
+                phone_number,
                 address, 
                 zip_code, 
                 referral, 
@@ -103,7 +105,7 @@ export class CustomerRepository {
                 shop
             )
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
             `,
             [
@@ -111,6 +113,7 @@ export class CustomerRepository {
                 data,
                 firstName,
                 lastName,
+                phoneNumber,
                 address,
                 zipCode,
                 referral,
@@ -134,11 +137,12 @@ export class CustomerRepository {
                 data = $3, 
                 first_name = $4, 
                 last_name = $5, 
-                address = $6,  
-                zip_code = $7, 
-                referral = $8, 
-                maintenance_version = $9, 
-                shop = $10
+                phone_number = $6,
+                address = $7,
+                zip_code = $8, 
+                referral = $9, 
+                maintenance_version = $10, 
+                shop = $11
             WHERE id = $1
             `,
             [
@@ -147,6 +151,7 @@ export class CustomerRepository {
                 customer.data,
                 customer.firstName,
                 customer.lastName,
+                customer.phoneNumber,
                 customer.address,
                 customer.zipCode,
                 customer.referral,
@@ -163,6 +168,7 @@ export class CustomerRepository {
             row.data,
             row.first_name,
             row.last_name,
+            row.phone_number,
             row.address,
             row.zip_code,
             row.referral,

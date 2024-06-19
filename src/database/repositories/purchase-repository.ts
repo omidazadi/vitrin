@@ -12,6 +12,7 @@ export class PurchaseRepository {
         customer: number | null,
         recipientFirstName: string,
         recipientLastName: string,
+        recipientPhoneNumber: string,
         recipientAddress: string,
         recipientZipCode: string,
         status: 'pending' | 'canceled' | 'paid' | 'delivered',
@@ -36,6 +37,7 @@ export class PurchaseRepository {
                 customer,
                 recipient_first_name,
                 recipient_last_name,
+                recipient_phone_number,
                 recipient_address,
                 recipient_zip_code,
                 status,
@@ -67,7 +69,8 @@ export class PurchaseRepository {
                     $15,
                     $16,
                     $17,
-                    $18
+                    $18,
+                    $19
                 )
             RETURNING *
             `,
@@ -79,6 +82,7 @@ export class PurchaseRepository {
                 customer,
                 recipientFirstName,
                 recipientLastName,
+                recipientPhoneNumber,
                 recipientAddress,
                 recipientZipCode,
                 status,
@@ -298,6 +302,7 @@ export class PurchaseRepository {
             row.customer,
             row.recipient_first_name,
             row.recipient_last_name,
+            row.recipient_phone_number,
             row.recipient_address,
             row.recipient_zip_code,
             row.status,
