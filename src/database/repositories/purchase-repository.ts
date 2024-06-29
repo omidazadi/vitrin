@@ -211,7 +211,7 @@ export class PurchaseRepository {
             [referral, shop],
         );
 
-        return result.rows[0].cnt;
+        return result.rows.length === 0 ? 0 : result.rows[0].cnt;
     }
 
     public async getTotalReferralPurchaseSum(
@@ -236,7 +236,7 @@ export class PurchaseRepository {
             [referral, shop],
         );
 
-        return result.rows[0].sum;
+        return result.rows.length === 0 ? 0 : result.rows[0].sum;
     }
 
     public async getCurrentReferralPurchaseCount(
@@ -263,7 +263,7 @@ export class PurchaseRepository {
             [referral, shop],
         );
 
-        return result.rows[0].cnt;
+        return result.rows.length === 0 ? 0 : result.rows[0].cnt;
     }
 
     public async getCurrentReferralPurchaseSum(
@@ -290,7 +290,7 @@ export class PurchaseRepository {
             [referral, shop],
         );
 
-        return result.rows[0].sum;
+        return result.rows.length === 0 ? 0 : result.rows[0].sum;
     }
 
     private bake(row: any): Purchase {

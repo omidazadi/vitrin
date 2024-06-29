@@ -73,7 +73,7 @@ export class CustomerRepository {
             [referral, shop],
         );
 
-        return result.rows[0].cnt;
+        return result.rows.length === 0 ? 0 : result.rows[0].cnt;
     }
 
     public async createCustomer(
